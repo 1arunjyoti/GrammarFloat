@@ -6,10 +6,10 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="16dp"
-    app:cardCornerRadius="16dp"
+    app:cardCornerRadius="28dp"
     app:cardElevation="8dp"
-    app:strokeWidth="1dp"
-    app:strokeColor="#E0E0E0"
+    app:strokeWidth="0dp"
+    app:cardBackgroundColor="?attr/colorSurfaceContainerHigh"
     android:clickable="true"
     android:focusable="true">
 
@@ -17,9 +17,11 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="16dp">
+        android:padding="16dp"
+        android:animateLayoutChanges="true">
 
         <LinearLayout
+            android:id="@+id/layoutTitleBar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
@@ -29,7 +31,7 @@
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:src="@android:drawable/ic_menu_edit"
-                app:tint="?attr/colorPrimary" />
+                app:tint="@color/overlay_primary" />
 
             <TextView
                 android:layout_width="0dp"
@@ -37,6 +39,7 @@
                 android:layout_weight="1"
                 android:layout_marginStart="8dp"
                 android:text="Grammar Check"
+                android:textColor="@color/overlay_text_primary"
                 android:textStyle="bold"
                 android:textSize="16sp" />
 
@@ -45,6 +48,7 @@
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
+                app:tint="@color/overlay_icon_tint"
                 android:src="@android:drawable/ic_menu_close_clear_cancel" />
         </LinearLayout>
 
@@ -69,6 +73,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
+                android:textColor="@color/overlay_text_primary"
                 android:text="Analyzing text..." />
         </LinearLayout>
 
@@ -85,7 +90,7 @@
                 android:id="@+id/tvOriginalText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textColor="#757575"
+                android:textColor="@color/overlay_text_secondary"
                 android:textSize="14sp"
                 tools:text="This are a bad sentence." />
 
@@ -94,7 +99,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:textColor="#000000"
+                android:textColor="@color/overlay_text_primary"
                 android:textSize="16sp"
                 tools:text="This is a bad sentence." />
 
@@ -103,22 +108,113 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:layout_marginTop="16dp"
-                android:gravity="end">
+                android:gravity="center_vertical">
 
-                <Button
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnWhy"
+                    style="@style/Widget.Material3.Button.TextButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Why?" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnAdjustTone"
+                    style="@style/Widget.Material3.Button.TextButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Tone" />
+
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_weight="1" />
+
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnCopy"
-                    style="@style/Widget.MaterialComponents.Button.TextButton"
+                    style="@style/Widget.Material3.Button.TextButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Copy" />
 
-                <Button
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnReplace"
+                    style="@style/Widget.Material3.Button.TonalButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
                     android:text="Replace" />
             </LinearLayout>
+
+            <!-- Explanation Area -->
+            <LinearLayout
+                android:id="@+id/layoutExplanation"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginTop="8dp"
+                android:paddingTop="8dp"
+                android:visibility="gone">
+                
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/overlay_stroke"
+                    android:layout_marginBottom="8dp" />
+
+                <ProgressBar
+                    android:id="@+id/progressExplanation"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_gravity="center"
+                    android:indeterminate="true"
+                    android:visibility="gone" />
+
+                <TextView
+                    android:id="@+id/tvExplanation"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/overlay_text_secondary"
+                    android:textSize="13sp"
+                    android:textStyle="italic"
+                    android:visibility="gone"
+                    tools:text="Changed 'is' to 'are' to match the plural subject." />
+            </LinearLayout>
+
+            <!-- Tone Chips Area -->
+            <HorizontalScrollView
+                android:id="@+id/layoutToneChips"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:scrollbars="none"
+                android:visibility="gone"
+                android:layout_marginTop="8dp">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chipProfessional"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Professional" />
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chipCasual"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:text="Casual" />
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chipShorten"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:text="Shorten" />
+                </LinearLayout>
+            </HorizontalScrollView>
         </LinearLayout>
 
         <!-- Error State -->
@@ -134,12 +230,12 @@
                 android:id="@+id/tvErrorMessage"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textColor="#D32F2F"
+                android:textColor="@color/overlay_error"
                 tools:text="Failed to connect to API." />
 
-            <Button
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnRetry"
-                style="@style/Widget.MaterialComponents.Button.TextButton"
+                style="@style/Widget.Material3.Button.TextButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"

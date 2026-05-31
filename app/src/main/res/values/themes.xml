@@ -1,12 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="Theme.GrammarOverlay" parent="Theme.MaterialComponents.Light.DarkActionBar">
+    <style name="Theme.GrammarOverlay" parent="Theme.Material3.DayNight.NoActionBar">
         <item name="colorPrimary">#6200EE</item>
         <item name="colorPrimaryDark">#3700B3</item>
         <item name="colorAccent">#03DAC5</item>
+        <item name="colorSurfaceContainer">#F3EDFA</item>
+        <item name="colorSurfaceContainerLow">#FAF8FC</item>
+        <!-- Ensure status bar icons are dark (visible) on light backgrounds -->
+        <item name="android:windowLightStatusBar">true</item>
     </style>
 
-    <style name="Theme.Translucent.NoTitleBar" parent="Theme.AppCompat.Light.NoActionBar">
+    <style name="OverlayAnimation">
+        <item name="android:windowEnterAnimation">@anim/fade_scale_in</item>
+        <item name="android:windowExitAnimation">@anim/fade_scale_out</item>
+    </style>
+
+    <!-- Theme to keep ProcessTextActivity fully invisible while not stealing input focus -->
+    <style name="Theme.ProcessText" parent="Theme.AppCompat.DayNight.NoActionBar">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowIsFloating">false</item>
+        <item name="android:backgroundDimEnabled">false</item>
+        <item name="android:windowAnimationStyle">@null</item>
+        <item name="android:windowDisablePreview">true</item>
+    </style>
+
+    <style name="Theme.Translucent.NoTitleBar" parent="Theme.AppCompat.DayNight.NoActionBar">
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:windowContentOverlay">@null</item>

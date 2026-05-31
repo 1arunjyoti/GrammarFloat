@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="overlay_text_primary">#FFFFFF</color>
+    <color name="overlay_text_secondary">#B0B0B0</color>
+    <color name="overlay_stroke">#424242</color>
+    <color name="overlay_error">#EF5350</color>
+    <color name="overlay_icon_tint">#B0B0B0</color>
+    <color name="overlay_primary">#BB86FC</color>
+</resources>

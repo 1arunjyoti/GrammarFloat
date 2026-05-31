@@ -54,18 +54,14 @@ class SettingsActivity : AppCompatActivity() {
     private fun setupProviderSpinner() {
         val adapter = ArrayAdapter(
             this,
-            android.R.layout.simple_spinner_item,
+            android.R.layout.simple_dropdown_item_1line,
             providers.map { it.displayName }
         )
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        binding.spinnerProvider.adapter = adapter
+        binding.spinnerProvider.setAdapter(adapter)
 
-        binding.spinnerProvider.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                val selectedProvider = providers[position]
-                binding.etApiKey.setText(store.getApiKey(selectedProvider) ?: "")
-            }
-            override fun onNothingSelected(parent: AdapterView<*>?) {}
+        binding.spinnerProvider.setOnItemClickListener { _, _, position, _ ->
+            val selectedProvider = providers[position]
+            binding.etApiKey.setText(store.getApiKey(selectedProvider) ?: "")
         }
     }
 
@@ -81,11 +77,13 @@ class SettingsActivity : AppCompatActivity() {
 
     private fun updatePermissionStatus() {
         if (Settings.canDrawOverlays(this)) {
-            binding.tvPermissionStatus.text = "✓ Permission granted"
-            binding.btnGrantPermission.isEnabled = false
+            binding.tvPermissionStatus.text = "Status: Granted"
+            binding.tvPermissionStatus.setTextColor(android.graphics.Color.parseColor("#4CAF50"))
+            binding.btnGrantPermission.visibility = View.GONE
         } else {
-            binding.tvPermissionStatus.text = "✗ Permission not granted"
-            binding.btnGrantPermission.isEnabled = true
+            binding.tvPermissionStatus.text = "Status: Action Required"
+            binding.tvPermissionStatus.setTextColor(android.graphics.Color.parseColor("#F44336"))
+            binding.btnGrantPermission.visibility = View.VISIBLE
         }
     }
 
@@ -103,7 +101,8 @@ class SettingsActivity : AppCompatActivity() {
 
     private fun setupSaveButton() {
         binding.btnSaveKey.setOnClickListener {
-            val provider = providers[binding.spinnerProvider.selectedItemPosition]
+            val selectedText = binding.spinnerProvider.text.toString()
+            val provider = providers.find { it.displayName == selectedText } ?: providers[0]
             val key = binding.etApiKey.text.toString().trim()
             if (key.isNotBlank()) {
                 binding.btnSaveKey.isEnabled = false
@@ -134,6 +133,9 @@ class SettingsActivity : AppCompatActivity() {
     private fun loadSavedKey() {
         val activeProvider = store.getActiveProvider()
         val index = providers.indexOf(activeProvider)
-        binding.spinnerProvider.setSelection(if (index >= 0) index else 0)
+        val provider = if (index >= 0) providers[index] else providers[0]
+        
+        binding.spinnerProvider.setText(provider.displayName, false)
+        binding.etApiKey.setText(store.getApiKey(provider) ?: "")
     }
 }

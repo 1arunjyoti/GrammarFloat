@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.GrammarOverlay" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">#BB86FC</item>
+        <item name="colorPrimaryDark">#3700B3</item>
+        <item name="colorAccent">#03DAC5</item>
+        <item name="colorSurfaceContainer">#1D1B20</item>
+        <item name="colorSurfaceContainerLow">#141218</item>
+        <!-- Keep status bar icons light (white) on dark backgrounds -->
+        <item name="android:windowLightStatusBar">false</item>
+    </style>
+</resources>

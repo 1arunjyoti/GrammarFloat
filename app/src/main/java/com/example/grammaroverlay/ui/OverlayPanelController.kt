@@ -22,6 +22,8 @@ class OverlayPanelController(context: Context) {
     var onClose: (() -> Unit)? = null
     var onCopy: ((String) -> Unit)? = null
     var onReplace: ((String) -> Unit)? = null
+    var onExplain: (() -> Unit)? = null
+    var onAdjustTone: ((String) -> Unit)? = null
 
     init {
         binding.btnClose.setOnClickListener {
@@ -36,6 +38,21 @@ class OverlayPanelController(context: Context) {
         binding.btnReplace.setOnClickListener {
             onReplace?.invoke(binding.tvCorrectedText.text.toString())
         }
+
+        binding.btnWhy.setOnClickListener {
+            binding.btnWhy.visibility = View.GONE
+            showExplanationLoading()
+            onExplain?.invoke()
+        }
+
+        binding.btnAdjustTone.setOnClickListener {
+            binding.btnAdjustTone.visibility = View.GONE
+            binding.layoutToneChips.visibility = View.VISIBLE
+        }
+
+        binding.chipProfessional.setOnClickListener { onAdjustTone?.invoke("professional") }
+        binding.chipCasual.setOnClickListener { onAdjustTone?.invoke("casual") }
+        binding.chipShorten.setOnClickListener { onAdjustTone?.invoke("shorten") }
     }
 
     fun show() {
@@ -54,6 +71,50 @@ class OverlayPanelController(context: Context) {
 
         params.gravity = Gravity.TOP or Gravity.CENTER_HORIZONTAL
         params.y = 100 // Slight offset from the very top
+        params.windowAnimations = R.style.OverlayAnimation
+
+        // Handle dragging
+        var initialY = 0
+        var initialTouchY = 0f
+
+        binding.layoutTitleBar.setOnTouchListener { _, event ->
+            when (event.action) {
+                android.view.MotionEvent.ACTION_DOWN -> {
+                    initialY = params.y
+                    initialTouchY = event.rawY
+                    true
+                }
+                android.view.MotionEvent.ACTION_MOVE -> {
+                    params.y = initialY + (event.rawY - initialTouchY).toInt()
+                    windowManager.updateViewLayout(binding.root, params)
+                    true
+                }
+                else -> false
+            }
+        }
+
+        // Handle outside touches
+        binding.root.setOnTouchListener { _, event ->
+            if (event.action == android.view.MotionEvent.ACTION_OUTSIDE) {
+                hide()
+                onClose?.invoke()
+                true
+            } else {
+                false
+            }
+        }
+
+        // Handle Back button
+        binding.root.isFocusableInTouchMode = true
+        binding.root.setOnKeyListener { _, keyCode, event ->
+            if (keyCode == android.view.KeyEvent.KEYCODE_BACK && event.action == android.view.KeyEvent.ACTION_UP) {
+                hide()
+                onClose?.invoke()
+                true
+            } else {
+                false
+            }
+        }
 
         windowManager.addView(binding.root, params)
         isAdded = true
@@ -76,9 +137,26 @@ class OverlayPanelController(context: Context) {
         binding.layoutLoading.visibility = View.GONE
         binding.layoutResult.visibility = View.VISIBLE
         binding.layoutError.visibility = View.GONE
+        binding.layoutExplanation.visibility = View.GONE
+        binding.btnWhy.visibility = View.VISIBLE
+        binding.layoutToneChips.visibility = View.GONE
+        binding.btnAdjustTone.visibility = View.VISIBLE
 
         binding.tvOriginalText.text = originalText
         binding.tvCorrectedText.text = getHighlightedText(originalText, correctedText)
+    }
+
+    fun showExplanationLoading() {
+        binding.layoutExplanation.visibility = View.VISIBLE
+        binding.progressExplanation.visibility = View.VISIBLE
+        binding.tvExplanation.visibility = View.GONE
+    }
+
+    fun showExplanation(explanation: String) {
+        binding.layoutExplanation.visibility = View.VISIBLE
+        binding.progressExplanation.visibility = View.GONE
+        binding.tvExplanation.visibility = View.VISIBLE
+        binding.tvExplanation.text = explanation
     }
 
     private fun getHighlightedText(original: String, corrected: String): android.text.SpannableString {
@@ -127,8 +205,10 @@ class OverlayPanelController(context: Context) {
         
         // Now apply spans
         var currentIndex = 0
-        val color = android.graphics.Color.parseColor("#2E7D32") // Dark Green
-        val bgColor = android.graphics.Color.parseColor("#E8F5E9") // Light Green BG
+        
+        val isNightMode = (binding.root.context.resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK) == android.content.res.Configuration.UI_MODE_NIGHT_YES
+        val color = if (isNightMode) android.graphics.Color.parseColor("#81C784") else android.graphics.Color.parseColor("#2E7D32")
+        val bgColor = if (isNightMode) android.graphics.Color.parseColor("#1B5E20") else android.graphics.Color.parseColor("#E8F5E9")
         
         for (k in corrWords.indices) {
             val word = corrWords[k]

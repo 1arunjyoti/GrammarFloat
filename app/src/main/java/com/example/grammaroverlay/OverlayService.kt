@@ -80,6 +80,12 @@ class OverlayService : Service() {
                 hide()
                 stopSelf()
             }
+            onExplain = {
+                fetchExplanation(originalText)
+            }
+            onAdjustTone = { tone ->
+                processTone(originalText, tone)
+            }
             show()
             showLoading()
         }
@@ -87,12 +93,68 @@ class OverlayService : Service() {
         processText(originalText)
     }
 
+    private fun processTone(originalText: String, tone: String) {
+        panelController?.showLoading()
+        serviceScope.launch {
+            try {
+                val (provider, apiKey) = kotlinx.coroutines.withContext(Dispatchers.IO) {
+                    val store = ApiKeyStore(this@OverlayService)
+                    val p = store.getActiveProvider()
+                    Pair(p, store.getApiKey(p))
+                }
+                
+                if (apiKey.isNullOrBlank()) {
+                    panelController?.showError("API key missing. Please configure in settings.", onRetry = { stopSelf() })
+                    return@launch
+                }
+
+                val apiClient = ApiClientFactory.create(provider)
+                val newText = apiClient.adjustTone(originalText, tone, apiKey)
+                currentCorrectedText = newText
+
+                panelController?.showResult(originalText, newText)
+            } catch (e: Exception) {
+                e.printStackTrace()
+                panelController?.showError("Error: ${e.message}", onRetry = {
+                    processTone(originalText, tone)
+                })
+            }
+        }
+    }
+
+    private var currentCorrectedText: String? = null
+
+    private fun fetchExplanation(originalText: String) {
+        val correctedText = currentCorrectedText ?: return
+        serviceScope.launch {
+            try {
+                val (provider, apiKey) = kotlinx.coroutines.withContext(Dispatchers.IO) {
+                    val store = ApiKeyStore(this@OverlayService)
+                    val p = store.getActiveProvider()
+                    Pair(p, store.getApiKey(p))
+                }
+                
+                if (apiKey.isNullOrBlank()) return@launch
+
+                val apiClient = ApiClientFactory.create(provider)
+                val explanation = apiClient.explainCorrection(originalText, correctedText, apiKey)
+
+                panelController?.showExplanation(explanation)
+            } catch (e: Exception) {
+                e.printStackTrace()
+                panelController?.showExplanation("Error: ${e.message}")
+            }
+        }
+    }
+
     private fun processText(originalText: String) {
         serviceScope.launch {
             try {
-                val store = ApiKeyStore(this@OverlayService)
-                val provider = store.getActiveProvider()
-                val apiKey = store.getApiKey(provider)
+                val (provider, apiKey) = kotlinx.coroutines.withContext(Dispatchers.IO) {
+                    val store = ApiKeyStore(this@OverlayService)
+                    val p = store.getActiveProvider()
+                    Pair(p, store.getApiKey(p))
+                }
                 
                 if (apiKey.isNullOrBlank()) {
                     panelController?.showError("API key missing. Please configure in settings.", onRetry = { stopSelf() })
@@ -101,6 +163,7 @@ class OverlayService : Service() {
 
                 val apiClient = ApiClientFactory.create(provider)
                 val correctedText = apiClient.checkGrammar(originalText, apiKey)
+                currentCorrectedText = correctedText
 
                 panelController?.showResult(originalText, correctedText)
             } catch (e: Exception) {
