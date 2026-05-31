@@ -1,4 +1,4 @@
-package com.example.grammaroverlay
+package app.grammarfloat.pro
 
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -11,7 +11,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.widget.Toast
-import com.example.grammaroverlay.storage.ApiKeyStore
+import app.grammarfloat.pro.storage.ApiKeyStore
 
 class ProcessTextActivity : AppCompatActivity() {
 

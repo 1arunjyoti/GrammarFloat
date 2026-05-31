@@ -1,6 +1,6 @@
-package com.example.grammaroverlay.ui.main
+package app.grammarfloat.pro.ui.main
 
-import com.example.grammaroverlay.data.DataRepository
+import app.grammarfloat.pro.data.DataRepository
 import junit.framework.TestCase.assertEquals
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first

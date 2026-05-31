@@ -1,4 +1,4 @@
-package com.example.grammaroverlay
+package app.grammarfloat.pro
 
 import android.content.Intent
 import android.os.Bundle

@@ -1,4 +1,4 @@
-package com.example.grammaroverlay
+package app.grammarfloat.pro
 
 import android.app.Notification
 import android.app.NotificationChannel
@@ -12,9 +12,9 @@ import android.os.Build
 import android.os.IBinder
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
-import com.example.grammaroverlay.api.ApiClientFactory
-import com.example.grammaroverlay.storage.ApiKeyStore
-import com.example.grammaroverlay.ui.OverlayPanelController
+import app.grammarfloat.pro.api.ApiClientFactory
+import app.grammarfloat.pro.storage.ApiKeyStore
+import app.grammarfloat.pro.ui.OverlayPanelController
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -27,8 +27,8 @@ class OverlayService : Service() {
     private val serviceScope = CoroutineScope(Dispatchers.Main + Job())
 
     companion object {
-        const val ACTION_REPLACE_TEXT = "com.example.grammaroverlay.ACTION_REPLACE_TEXT"
-        const val ACTION_CANCEL_TEXT = "com.example.grammaroverlay.ACTION_CANCEL_TEXT"
+        const val ACTION_REPLACE_TEXT = "app.grammarfloat.pro.ACTION_REPLACE_TEXT"
+        const val ACTION_CANCEL_TEXT = "app.grammarfloat.pro.ACTION_CANCEL_TEXT"
         const val EXTRA_REPLACEMENT_TEXT = "EXTRA_REPLACEMENT_TEXT"
     }
 

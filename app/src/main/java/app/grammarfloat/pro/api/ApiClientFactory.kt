@@ -1,4 +1,4 @@
-package com.example.grammaroverlay.api
+package app.grammarfloat.pro.api
 
 object ApiClientFactory {
     fun create(provider: Provider): ApiClient {

@@ -1,10 +1,10 @@
-package com.example.grammaroverlay.storage
+package app.grammarfloat.pro.storage
 
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
-import com.example.grammaroverlay.api.Provider
+import app.grammarfloat.pro.api.Provider
 
 class ApiKeyStore(context: Context) {
     private val prefs: SharedPreferences

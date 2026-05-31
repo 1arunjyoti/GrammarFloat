@@ -1,4 +1,4 @@
-package com.example.grammaroverlay
+package app.grammarfloat.pro
 
 import android.content.Intent
 import android.net.Uri
@@ -9,10 +9,10 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.example.grammaroverlay.databinding.ActivitySettingsBinding
-import com.example.grammaroverlay.api.Provider
-import com.example.grammaroverlay.storage.ApiKeyStore
-import com.example.grammaroverlay.api.ApiClientFactory
+import app.grammarfloat.pro.databinding.ActivitySettingsBinding
+import app.grammarfloat.pro.api.Provider
+import app.grammarfloat.pro.storage.ApiKeyStore
+import app.grammarfloat.pro.api.ApiClientFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job

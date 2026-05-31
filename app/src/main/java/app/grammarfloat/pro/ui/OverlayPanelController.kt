@@ -1,4 +1,4 @@
-package com.example.grammaroverlay.ui
+package app.grammarfloat.pro.ui
 
 import android.content.Context
 import android.graphics.PixelFormat
@@ -7,14 +7,14 @@ import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.WindowManager
-import com.example.grammaroverlay.databinding.OverlayPanelBinding
+import app.grammarfloat.pro.databinding.OverlayPanelBinding
 
 import android.view.ContextThemeWrapper
-import com.example.grammaroverlay.R
+import app.grammarfloat.pro.R
 
 class OverlayPanelController(context: Context) {
 
-    private val themedContext = ContextThemeWrapper(context, R.style.Theme_GrammarOverlay)
+    private val themedContext = ContextThemeWrapper(context, R.style.Theme_GrammarFloat)
     private val windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
     private val binding: OverlayPanelBinding = OverlayPanelBinding.inflate(LayoutInflater.from(themedContext))
     private var isAdded = false

@@ -1,4 +1,4 @@
-package com.example.grammaroverlay.api
+package app.grammarfloat.pro.api
 
 interface ApiClient {
     suspend fun checkGrammar(text: String, apiKey: String): String

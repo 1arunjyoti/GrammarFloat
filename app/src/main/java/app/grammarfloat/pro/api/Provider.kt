@@ -1,4 +1,4 @@
-package com.example.grammaroverlay.api
+package app.grammarfloat.pro.api
 
 enum class Provider(val displayName: String) {
     ANTHROPIC("Anthropic Claude"),

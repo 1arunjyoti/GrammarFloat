@@ -1,4 +1,4 @@
-package com.example.grammaroverlay.api
+package app.grammarfloat.pro.api
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
