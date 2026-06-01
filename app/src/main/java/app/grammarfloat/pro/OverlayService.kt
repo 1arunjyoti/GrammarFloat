@@ -25,22 +25,33 @@ class OverlayService : Service() {
 
     private var panelController: OverlayPanelController? = null
     private val serviceScope = CoroutineScope(Dispatchers.Main + Job())
+    private var currentJob: Job? = null
 
     companion object {
         const val ACTION_REPLACE_TEXT = "app.grammarfloat.pro.ACTION_REPLACE_TEXT"
         const val ACTION_CANCEL_TEXT = "app.grammarfloat.pro.ACTION_CANCEL_TEXT"
         const val EXTRA_REPLACEMENT_TEXT = "EXTRA_REPLACEMENT_TEXT"
+        const val EXTRA_IS_MOCK_TEST = "EXTRA_IS_MOCK_TEST"
     }
+
+    private var isMockTest = false
+    private lateinit var grammarRepository: app.grammarfloat.pro.api.GrammarRepository
 
     override fun onCreate() {
         super.onCreate()
+        grammarRepository = app.grammarfloat.pro.api.GrammarRepository(applicationContext)
         createNotificationChannel()
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         val text = intent?.getStringExtra("EXTRA_TEXT")
+        isMockTest = intent?.getBooleanExtra(EXTRA_IS_MOCK_TEST, false) ?: false
 
-        startForeground(1, createNotification())
+        if (Build.VERSION.SDK_INT >= 34) { // Android 14+ (UPSIDE_DOWN_CAKE)
+            startForeground(1, createNotification(), android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE)
+        } else {
+            startForeground(1, createNotification())
+        }
 
         if (text.isNullOrBlank()) {
             stopSelf()
@@ -95,31 +106,31 @@ class OverlayService : Service() {
     }
 
     private fun processTone(originalText: String, tone: String) {
+        currentJob?.cancel()
         panelController?.showLoading()
-        serviceScope.launch {
+        currentJob = serviceScope.launch {
             try {
-                val (provider, apiKey) = kotlinx.coroutines.withContext(Dispatchers.IO) {
-                    val store = ApiKeyStore(this@OverlayService)
-                    val p = store.getActiveProvider()
-                    Pair(p, store.getApiKey(p))
-                }
-                
-                if (apiKey.isNullOrBlank()) {
-                    panelController?.showError("API key missing. Please configure in settings.", onRetry = { stopSelf() })
+                if (isMockTest) {
+                    kotlinx.coroutines.delay(500)
+                    val newText = "This is a mock adjusted text for $tone tone."
+                    currentCorrectedText = newText
+                    panelController?.showResult(originalText, newText)
                     return@launch
                 }
 
-                val apiClient = ApiClientFactory.create(provider)
-                val newText = apiClient.adjustTone(originalText, tone, apiKey)
+                val newText = grammarRepository.adjustTone(originalText, tone)
                 currentCorrectedText = newText
-
                 panelController?.showResult(originalText, newText)
             } catch (e: Exception) {
                 if (e is kotlinx.coroutines.CancellationException) throw e
                 e.printStackTrace()
-                panelController?.showError("Error: ${e.message}", onRetry = {
-                    processTone(originalText, tone)
-                })
+                if (e is app.grammarfloat.pro.api.MissingApiKeyException) {
+                    panelController?.showError(e.message ?: "API key missing", onRetry = { stopSelf() })
+                } else {
+                    panelController?.showError("Error: ${e.message}", onRetry = {
+                        processTone(originalText, tone)
+                    })
+                }
             }
         }
     }
@@ -128,19 +139,16 @@ class OverlayService : Service() {
 
     private fun fetchExplanation(originalText: String) {
         val correctedText = currentCorrectedText ?: return
-        serviceScope.launch {
+        currentJob?.cancel()
+        currentJob = serviceScope.launch {
             try {
-                val (provider, apiKey) = kotlinx.coroutines.withContext(Dispatchers.IO) {
-                    val store = ApiKeyStore(this@OverlayService)
-                    val p = store.getActiveProvider()
-                    Pair(p, store.getApiKey(p))
+                if (isMockTest) {
+                    kotlinx.coroutines.delay(500)
+                    panelController?.showExplanation("This is a mock explanation for why the text was corrected. It shows that testing mode works without consuming API quota.")
+                    return@launch
                 }
-                
-                if (apiKey.isNullOrBlank()) return@launch
 
-                val apiClient = ApiClientFactory.create(provider)
-                val explanation = apiClient.explainCorrection(originalText, correctedText, apiKey)
-
+                val explanation = grammarRepository.explainCorrection(originalText, correctedText)
                 panelController?.showExplanation(explanation)
             } catch (e: Exception) {
                 if (e is kotlinx.coroutines.CancellationException) throw e
@@ -151,37 +159,38 @@ class OverlayService : Service() {
     }
 
     private fun processText(originalText: String) {
-        serviceScope.launch {
+        currentJob?.cancel()
+        currentJob = serviceScope.launch {
             try {
-                val (provider, apiKey) = kotlinx.coroutines.withContext(Dispatchers.IO) {
-                    val store = ApiKeyStore(this@OverlayService)
-                    val p = store.getActiveProvider()
-                    Pair(p, store.getApiKey(p))
-                }
-                
-                if (apiKey.isNullOrBlank()) {
-                    panelController?.showError("API key missing. Please configure in settings.", onRetry = { stopSelf() })
+                if (isMockTest) {
+                    kotlinx.coroutines.delay(500)
+                    val correctedText = "This is a test of the mock overlay."
+                    currentCorrectedText = correctedText
+                    panelController?.showResult(originalText, correctedText)
                     return@launch
                 }
 
-                val apiClient = ApiClientFactory.create(provider)
-                val correctedText = apiClient.checkGrammar(originalText, apiKey)
+                val correctedText = grammarRepository.checkGrammar(originalText)
                 currentCorrectedText = correctedText
-
                 panelController?.showResult(originalText, correctedText)
             } catch (e: Exception) {
                 if (e is kotlinx.coroutines.CancellationException) throw e
                 e.printStackTrace()
-                panelController?.showError("Error: ${e.message}", onRetry = {
-                    panelController?.showLoading()
-                    processText(originalText)
-                })
+                if (e is app.grammarfloat.pro.api.MissingApiKeyException) {
+                    panelController?.showError(e.message ?: "API key missing", onRetry = { stopSelf() })
+                } else {
+                    panelController?.showError("Error: ${e.message}", onRetry = {
+                        panelController?.showLoading()
+                        processText(originalText)
+                    })
+                }
             }
         }
     }
 
     override fun onDestroy() {
         super.onDestroy()
+        currentJob?.cancel()
         serviceScope.cancel()
         panelController?.hide()
         panelController = null

@@ -14,16 +14,13 @@
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
+        android:name=".GrammarFloatApp"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.GrammarFloat">
-        
-        <property
-            android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
-            android:value="Used to display a grammar-checking overlay panel while processing selected text." />
 
         <activity
             android:name=".MainActivity"
@@ -38,6 +35,12 @@
             android:name=".SettingsActivity"
             android:exported="false"
             android:label="Settings" />
+
+        <activity
+            android:name=".ManualCheckActivity"
+            android:exported="false"
+            android:theme="@style/Theme.GrammarFloat"
+            android:windowSoftInputMode="adjustResize" />
 
         <activity
             android:name=".ProcessTextActivity"
@@ -60,7 +63,11 @@
         <service
             android:name=".OverlayService"
             android:exported="false"
-            android:foregroundServiceType="specialUse" />
+            android:foregroundServiceType="specialUse">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Used to display a grammar-checking overlay panel while processing selected text." />
+        </service>
 
     </application>
 
