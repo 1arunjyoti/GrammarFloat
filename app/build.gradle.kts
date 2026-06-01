@@ -25,11 +25,11 @@ android {
         }
     }
     namespace = "app.grammarfloat.pro"
-    compileSdk = 36
+    compileSdk = 37
     defaultConfig {
         applicationId = "app.grammarfloat.pro"
         minSdk = 24
-        targetSdk = 36
+        targetSdk = 37
         versionCode = 1
         versionName = "1.0"
     }
@@ -37,6 +37,7 @@ android {
     buildTypes {
         release {
             isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
             signingConfig = signingConfigs.getByName("release")
         }
@@ -69,9 +70,6 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
-    
-    // Encrypted storage for API key
-    implementation(libs.androidx.security.crypto)
     
     // HTTP client for AI API calls
     implementation(libs.okhttp)

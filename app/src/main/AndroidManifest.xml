@@ -43,6 +43,7 @@
             android:name=".ProcessTextActivity"
             android:exported="true"
             android:theme="@style/Theme.ProcessText"
+            android:launchMode="singleTop"
             android:label="Check Grammar">
             <intent-filter>
                 <action android:name="android.intent.action.PROCESS_TEXT" />

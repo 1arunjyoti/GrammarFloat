@@ -11,7 +11,6 @@ import androidx.appcompat.app.AppCompatActivity
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.widget.Toast
-import app.grammarfloat.pro.storage.ApiKeyStore
 
 class ProcessTextActivity : AppCompatActivity() {
 
@@ -46,17 +45,6 @@ class ProcessTextActivity : AppCompatActivity() {
         )
         super.onCreate(savedInstanceState)
         
-        val textToProcess = if (intent.action == Intent.ACTION_SEND) {
-            intent.getStringExtra(Intent.EXTRA_TEXT)
-        } else {
-            intent.getCharSequenceExtra(Intent.EXTRA_PROCESS_TEXT)?.toString()
-        }
-
-        if (textToProcess.isNullOrBlank()) {
-            finish()
-            return
-        }
-
         val hasOverlayPermission = Settings.canDrawOverlays(this)
 
         if (!hasOverlayPermission) {
@@ -73,10 +61,27 @@ class ProcessTextActivity : AppCompatActivity() {
             addAction(OverlayService.ACTION_REPLACE_TEXT)
             addAction(OverlayService.ACTION_CANCEL_TEXT)
         }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            registerReceiver(receiver, filter, RECEIVER_NOT_EXPORTED)
+        androidx.core.content.ContextCompat.registerReceiver(this, receiver, filter, androidx.core.content.ContextCompat.RECEIVER_NOT_EXPORTED)
+
+        processIntent(intent)
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        processIntent(intent)
+    }
+
+    private fun processIntent(intent: Intent?) {
+        val textToProcess = if (intent?.action == Intent.ACTION_SEND) {
+            intent.getStringExtra(Intent.EXTRA_TEXT)
         } else {
-            registerReceiver(receiver, filter)
+            intent?.getCharSequenceExtra(Intent.EXTRA_PROCESS_TEXT)?.toString()
+        }
+
+        if (textToProcess.isNullOrBlank()) {
+            finish()
+            return
         }
 
         // Setup is complete. Pass text to OverlayService
@@ -90,8 +95,6 @@ class ProcessTextActivity : AppCompatActivity() {
         } else {
             startService(serviceIntent)
         }
-
-        // We do NOT call finish() here anymore. We wait for the broadcast receiver.
     }
 
     override fun onDestroy() {

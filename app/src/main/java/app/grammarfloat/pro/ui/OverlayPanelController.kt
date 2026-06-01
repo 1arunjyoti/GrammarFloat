@@ -11,6 +11,7 @@ import app.grammarfloat.pro.databinding.OverlayPanelBinding
 
 import android.view.ContextThemeWrapper
 import app.grammarfloat.pro.R
+import androidx.core.graphics.toColorInt
 
 class OverlayPanelController(context: Context) {
 
@@ -86,7 +87,11 @@ class OverlayPanelController(context: Context) {
                 }
                 android.view.MotionEvent.ACTION_MOVE -> {
                     params.y = initialY + (event.rawY - initialTouchY).toInt()
-                    windowManager.updateViewLayout(binding.root, params)
+                    try {
+                        windowManager.updateViewLayout(binding.root, params)
+                    } catch (e: IllegalArgumentException) {
+                        // Ignore
+                    }
                     true
                 }
                 else -> false
@@ -116,13 +121,21 @@ class OverlayPanelController(context: Context) {
             }
         }
 
-        windowManager.addView(binding.root, params)
-        isAdded = true
+        try {
+            windowManager.addView(binding.root, params)
+            isAdded = true
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 
     fun hide() {
         if (isAdded) {
-            windowManager.removeView(binding.root)
+            try {
+                windowManager.removeView(binding.root)
+            } catch (e: IllegalArgumentException) {
+                // Ignore if already removed
+            }
             isAdded = false
         }
     }
@@ -207,8 +220,8 @@ class OverlayPanelController(context: Context) {
         var currentIndex = 0
         
         val isNightMode = (binding.root.context.resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK) == android.content.res.Configuration.UI_MODE_NIGHT_YES
-        val color = if (isNightMode) android.graphics.Color.parseColor("#81C784") else android.graphics.Color.parseColor("#2E7D32")
-        val bgColor = if (isNightMode) android.graphics.Color.parseColor("#1B5E20") else android.graphics.Color.parseColor("#E8F5E9")
+        val color = if (isNightMode) "#81C784".toColorInt() else "#2E7D32".toColorInt()
+        val bgColor = if (isNightMode) "#1B5E20".toColorInt() else "#E8F5E9".toColorInt()
         
         for (k in corrWords.indices) {
             val word = corrWords[k]

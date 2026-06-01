@@ -1,3 +1,35 @@
 <resources>
     <string name="app_name">GrammarFloat</string>
+    <string name="settings_title">Settings</string>
+    <string name="system_permission">System Permission</string>
+    <string name="permission_desc">The app requires \'Display over other apps\' permission to show the grammar correction overlay anywhere.</string>
+    <string name="checking_permission">Checking permission…</string>
+    <string name="grant_permission">Grant Overlay Permission</string>
+    <string name="ai_configuration">AI Configuration</string>
+    <string name="select_provider">Select Provider</string>
+    <string name="api_key">API Key</string>
+    <string name="verify_save">Verify and Save Key</string>
+    <string name="api_key_resources">API Key Resources</string>
+    <string name="get_anthropic">Get Anthropic Key</string>
+    <string name="get_openai">Get OpenAI Key</string>
+    <string name="get_gemini">Get Google Gemini Key</string>
+    
+    <string name="grammar_check">Grammar Check</string>
+    <string name="close">Close</string>
+    <string name="analyzing_text">Analyzing text…</string>
+    <string name="why">Why?</string>
+    <string name="tone">Tone</string>
+    <string name="copy">Copy</string>
+    <string name="replace">Replace</string>
+    <string name="professional">Professional</string>
+    <string name="casual">Casual</string>
+    <string name="shorten">Shorten</string>
+    <string name="retry">Retry</string>
+    <string name="status_granted">Status: Granted</string>
+    <string name="status_action_required">Status: Action Required</string>
+    <string name="validating">Validating…</string>
+    <string name="save_key">Save Key</string>
+    <string name="key_verified_saved">✓ Key verified and saved</string>
+    <string name="invalid_key">Invalid Key: %1$s</string>
+    <string name="key_cannot_be_empty">Key cannot be empty</string>
 </resources>

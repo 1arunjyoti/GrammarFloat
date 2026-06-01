@@ -12,7 +12,7 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 
-class OpenAiApiClient : ApiClient {
+object OpenAiApiClient : ApiClient {
 
     @Serializable
     private data class OpenAiRequest(
@@ -37,12 +37,12 @@ class OpenAiApiClient : ApiClient {
             .post(requestBody)
             .build()
 
-        NetworkModule.okHttpClient.newCall(request).execute().use { response ->
+        NetworkModule.okHttpClient.newCall(request).await().use { response ->
             if (!response.isSuccessful) {
                 throw Exception("OpenAI API error: ${response.code} ${response.message}")
             }
             
-            val responseBodyString = response.body?.string() ?: throw Exception("Empty response body")
+            val responseBodyString = response.body.string()
             val jsonObject = NetworkModule.json.decodeFromString<JsonObject>(responseBodyString)
             
             // Robust dynamic parsing for the new v1/responses format
@@ -75,12 +75,12 @@ class OpenAiApiClient : ApiClient {
             .post(requestBody)
             .build()
 
-        NetworkModule.okHttpClient.newCall(request).execute().use { response ->
+        NetworkModule.okHttpClient.newCall(request).await().use { response ->
             if (!response.isSuccessful) {
                 throw Exception("OpenAI API error: ${response.code} ${response.message}")
             }
             
-            val responseBodyString = response.body?.string() ?: throw Exception("Empty response body")
+            val responseBodyString = response.body.string()
             val jsonObject = NetworkModule.json.decodeFromString<JsonObject>(responseBodyString)
             
             val explanation = jsonObject["output_text"]?.jsonPrimitive?.content
@@ -118,12 +118,12 @@ class OpenAiApiClient : ApiClient {
             .post(requestBody)
             .build()
 
-        NetworkModule.okHttpClient.newCall(request).execute().use { response ->
+        NetworkModule.okHttpClient.newCall(request).await().use { response ->
             if (!response.isSuccessful) {
                 throw Exception("OpenAI API error: ${response.code} ${response.message}")
             }
             
-            val responseBodyString = response.body?.string() ?: throw Exception("Empty response body")
+            val responseBodyString = response.body.string()
             val jsonObject = NetworkModule.json.decodeFromString<JsonObject>(responseBodyString)
             
             val rewritten = jsonObject["output_text"]?.jsonPrimitive?.content

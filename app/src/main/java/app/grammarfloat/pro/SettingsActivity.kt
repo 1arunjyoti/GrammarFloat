@@ -1,18 +1,18 @@
 package app.grammarfloat.pro
 
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
 import android.view.View
-import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import app.grammarfloat.pro.databinding.ActivitySettingsBinding
-import app.grammarfloat.pro.api.Provider
-import app.grammarfloat.pro.storage.ApiKeyStore
+import androidx.core.graphics.toColorInt
+import androidx.core.net.toUri
 import app.grammarfloat.pro.api.ApiClientFactory
+import app.grammarfloat.pro.api.Provider
+import app.grammarfloat.pro.databinding.ActivitySettingsBinding
+import app.grammarfloat.pro.storage.ApiKeyStore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -69,7 +69,7 @@ class SettingsActivity : AppCompatActivity() {
         binding.btnGrantPermission.setOnClickListener {
             val intent = Intent(
                 Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                Uri.parse("package:$packageName")
+                "package:$packageName".toUri()
             )
             startActivity(intent)
         }
@@ -77,25 +77,25 @@ class SettingsActivity : AppCompatActivity() {
 
     private fun updatePermissionStatus() {
         if (Settings.canDrawOverlays(this)) {
-            binding.tvPermissionStatus.text = "Status: Granted"
-            binding.tvPermissionStatus.setTextColor(android.graphics.Color.parseColor("#4CAF50"))
+            binding.tvPermissionStatus.text = getString(R.string.status_granted)
+            binding.tvPermissionStatus.setTextColor("#4CAF50".toColorInt())
             binding.btnGrantPermission.visibility = View.GONE
         } else {
-            binding.tvPermissionStatus.text = "Status: Action Required"
-            binding.tvPermissionStatus.setTextColor(android.graphics.Color.parseColor("#F44336"))
+            binding.tvPermissionStatus.text = getString(R.string.status_action_required)
+            binding.tvPermissionStatus.setTextColor("#F44336".toColorInt())
             binding.btnGrantPermission.visibility = View.VISIBLE
         }
     }
 
     private fun setupLinks() {
         binding.tvAnthropicLink.setOnClickListener {
-            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://console.anthropic.com/")))
+            startActivity(Intent(Intent.ACTION_VIEW, "https://console.anthropic.com/".toUri()))
         }
         binding.tvOpenaiLink.setOnClickListener {
-            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://platform.openai.com/")))
+            startActivity(Intent(Intent.ACTION_VIEW, "https://platform.openai.com/".toUri()))
         }
         binding.tvGeminiLink.setOnClickListener {
-            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://aistudio.google.com/")))
+            startActivity(Intent(Intent.ACTION_VIEW, "https://aistudio.google.com/".toUri()))
         }
     }
 
@@ -106,7 +106,7 @@ class SettingsActivity : AppCompatActivity() {
             val key = binding.etApiKey.text.toString().trim()
             if (key.isNotBlank()) {
                 binding.btnSaveKey.isEnabled = false
-                binding.btnSaveKey.text = "Validating..."
+                binding.btnSaveKey.text = getString(R.string.validating)
                 
                 activityScope.launch {
                     try {
@@ -116,16 +116,16 @@ class SettingsActivity : AppCompatActivity() {
                         
                         store.setApiKey(provider, key)
                         store.setActiveProvider(provider)
-                        Toast.makeText(this@SettingsActivity, "✓ Key verified and saved", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this@SettingsActivity, R.string.key_verified_saved, Toast.LENGTH_SHORT).show()
                     } catch (e: Exception) {
-                        Toast.makeText(this@SettingsActivity, "Invalid Key: ${e.message}", Toast.LENGTH_LONG).show()
+                        Toast.makeText(this@SettingsActivity, getString(R.string.invalid_key, e.message), Toast.LENGTH_LONG).show()
                     } finally {
                         binding.btnSaveKey.isEnabled = true
-                        binding.btnSaveKey.text = "Save Key"
+                        binding.btnSaveKey.text = getString(R.string.save_key)
                     }
                 }
             } else {
-                Toast.makeText(this, "Key cannot be empty", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, R.string.key_cannot_be_empty, Toast.LENGTH_SHORT).show()
             }
         }
     }

@@ -31,14 +31,15 @@
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:src="@android:drawable/ic_menu_edit"
-                app:tint="@color/overlay_primary" />
+                app:tint="@color/overlay_primary"
+                android:importantForAccessibility="no" />
 
             <TextView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:layout_marginStart="8dp"
-                android:text="Grammar Check"
+                android:text="@string/grammar_check"
                 android:textColor="@color/overlay_text_primary"
                 android:textStyle="bold"
                 android:textSize="16sp" />
@@ -49,7 +50,8 @@
                 android:layout_height="24dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 app:tint="@color/overlay_icon_tint"
-                android:src="@android:drawable/ic_menu_close_clear_cancel" />
+                android:src="@android:drawable/ic_menu_close_clear_cancel"
+                android:contentDescription="@string/close" />
         </LinearLayout>
 
         <!-- Loading State -->
@@ -74,7 +76,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
                 android:textColor="@color/overlay_text_primary"
-                android:text="Analyzing text..." />
+                android:text="@string/analyzing_text" />
         </LinearLayout>
 
         <!-- Result State -->
@@ -115,14 +117,14 @@
                     style="@style/Widget.Material3.Button.TextButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Why?" />
+                    android:text="@string/why" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnAdjustTone"
                     style="@style/Widget.Material3.Button.TextButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Tone" />
+                    android:text="@string/tone" />
 
                 <View
                     android:layout_width="0dp"
@@ -134,7 +136,7 @@
                     style="@style/Widget.Material3.Button.TextButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Copy" />
+                    android:text="@string/copy" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnReplace"
@@ -142,7 +144,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
-                    android:text="Replace" />
+                    android:text="@string/replace" />
             </LinearLayout>
 
             <!-- Explanation Area -->
@@ -198,21 +200,21 @@
                         android:id="@+id/chipProfessional"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Professional" />
+                        android:text="@string/professional" />
 
                     <com.google.android.material.chip.Chip
                         android:id="@+id/chipCasual"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="8dp"
-                        android:text="Casual" />
+                        android:text="@string/casual" />
 
                     <com.google.android.material.chip.Chip
                         android:id="@+id/chipShorten"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="8dp"
-                        android:text="Shorten" />
+                        android:text="@string/shorten" />
                 </LinearLayout>
             </HorizontalScrollView>
         </LinearLayout>
@@ -240,7 +242,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:layout_gravity="end"
-                android:text="Retry" />
+                android:text="@string/retry" />
         </LinearLayout>
 
     </LinearLayout>

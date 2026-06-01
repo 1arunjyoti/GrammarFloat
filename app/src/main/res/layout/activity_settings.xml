@@ -4,8 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fillViewport="true"
-    android:background="?android:attr/windowBackground">
+    android:fillViewport="true">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -17,7 +16,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Settings"
+            android:text="@string/settings_title"
             android:textSize="36sp"
             android:textStyle="bold"
             android:layout_marginBottom="32dp"
@@ -39,32 +38,22 @@
                 android:orientation="vertical"
                 android:padding="16dp">
 
-                <LinearLayout
+                <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
+                    android:text="@string/system_permission"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    app:drawableStartCompat="@drawable/ic_shield"
+                    android:drawablePadding="8dp"
                     android:gravity="center_vertical"
-                    android:layout_marginBottom="8dp">
-
-                    <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:src="@drawable/ic_shield"
-                        app:tint="?attr/colorPrimary"
-                        android:layout_marginEnd="8dp" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="System Permission"
-                        android:textSize="18sp"
-                        android:textStyle="bold" />
-                </LinearLayout>
+                    android:layout_marginBottom="8dp"
+                    app:drawableTint="?attr/colorPrimary" />
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="The app requires 'Display over other apps' permission to show the grammar correction overlay anywhere."
+                    android:text="@string/permission_desc"
                     android:textColor="?android:attr/textColorSecondary"
                     android:textSize="14sp"
                     android:layout_marginBottom="16dp" />
@@ -73,7 +62,7 @@
                     android:id="@+id/tvPermissionStatus"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Checking permission..."
+                    android:text="@string/checking_permission"
                     android:textStyle="bold"
                     android:layout_marginBottom="8dp" />
 
@@ -81,7 +70,7 @@
                     android:id="@+id/btnGrantPermission"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Grant Overlay Permission"
+                    android:text="@string/grant_permission"
                     app:icon="@drawable/ic_open_in_new" />
 
             </LinearLayout>
@@ -103,34 +92,24 @@
                 android:orientation="vertical"
                 android:padding="16dp">
 
-                <LinearLayout
+                <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
+                    android:text="@string/ai_configuration"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    app:drawableStartCompat="@drawable/ic_robot"
+                    android:drawablePadding="8dp"
                     android:gravity="center_vertical"
-                    android:layout_marginBottom="16dp">
-
-                    <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:src="@drawable/ic_robot"
-                        app:tint="?attr/colorPrimary"
-                        android:layout_marginEnd="8dp" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="AI Configuration"
-                        android:textSize="18sp"
-                        android:textStyle="bold" />
-                </LinearLayout>
+                    android:layout_marginBottom="16dp"
+                    app:drawableTint="?attr/colorPrimary" />
 
                 <com.google.android.material.textfield.TextInputLayout
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="16dp"
-                    android:hint="Select Provider">
+                    android:hint="@string/select_provider">
 
                     <AutoCompleteTextView
                         android:id="@+id/spinnerProvider"
@@ -150,7 +129,7 @@
                         android:id="@+id/etApiKey"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="API Key"
+                        android:hint="@string/api_key"
                         android:inputType="textPassword" />
                 </com.google.android.material.textfield.TextInputLayout>
 
@@ -158,7 +137,7 @@
                     android:id="@+id/btnSaveKey"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Verify and Save Key" />
+                    android:text="@string/verify_save" />
 
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
@@ -167,7 +146,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="API Key Resources"
+            android:text="@string/api_key_resources"
             android:textSize="18sp"
             android:textStyle="bold"
             android:layout_marginBottom="12dp" />
@@ -182,7 +161,7 @@
                 style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Get Anthropic Key"
+                android:text="@string/get_anthropic"
                 app:icon="@drawable/ic_open_in_new"
                 app:iconGravity="textEnd"
                 android:layout_marginBottom="8dp" />
@@ -192,7 +171,7 @@
                 style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Get OpenAI Key"
+                android:text="@string/get_openai"
                 app:icon="@drawable/ic_open_in_new"
                 app:iconGravity="textEnd"
                 android:layout_marginBottom="8dp" />
@@ -202,7 +181,7 @@
                 style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Get Google Gemini Key"
+                android:text="@string/get_gemini"
                 app:icon="@drawable/ic_open_in_new"
                 app:iconGravity="textEnd" />
         </LinearLayout>

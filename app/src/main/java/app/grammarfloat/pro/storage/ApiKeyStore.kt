@@ -2,38 +2,98 @@ package app.grammarfloat.pro.storage
 
 import android.content.Context
 import android.content.SharedPreferences
-import androidx.security.crypto.EncryptedSharedPreferences
-import androidx.security.crypto.MasterKey
+import android.security.keystore.KeyGenParameterSpec
+import android.security.keystore.KeyProperties
+import android.util.Base64
+import androidx.core.content.edit
 import app.grammarfloat.pro.api.Provider
+import java.security.KeyStore
+import javax.crypto.Cipher
+import javax.crypto.KeyGenerator
+import javax.crypto.SecretKey
+import javax.crypto.spec.GCMParameterSpec
 
 class ApiKeyStore(context: Context) {
-    private val prefs: SharedPreferences
+    // We use a different pref name than the old EncryptedSharedPreferences one to avoid crash/conflicts
+    private val prefs: SharedPreferences = context.getSharedPreferences("api_keys_secure", Context.MODE_PRIVATE)
 
-    init {
-        val masterKey = MasterKey.Builder(context)
-            .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
-            .build()
+    companion object {
+        private const val ALIAS = "GrammarFloatApiKeyAlias"
 
-        prefs = EncryptedSharedPreferences.create(
-            context,
-            "secret_api_keys",
-            masterKey,
-            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-        )
+        init {
+            try {
+                val keyStore = KeyStore.getInstance("AndroidKeyStore")
+                keyStore.load(null)
+                if (!keyStore.containsAlias(ALIAS)) {
+                    val keyGenerator = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, "AndroidKeyStore")
+                    val keyGenParameterSpec = KeyGenParameterSpec.Builder(
+                        ALIAS,
+                        KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT
+                    )
+                        .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
+                        .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
+                        .build()
+                    keyGenerator.init(keyGenParameterSpec)
+                    keyGenerator.generateKey()
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+
+        private fun encrypt(plainText: String): String? {
+            return try {
+                val cipher = Cipher.getInstance("AES/GCM/NoPadding")
+                val keyStore = KeyStore.getInstance("AndroidKeyStore")
+                keyStore.load(null)
+                val secretKey = keyStore.getKey(ALIAS, null) as SecretKey
+                cipher.init(Cipher.ENCRYPT_MODE, secretKey)
+                val iv = cipher.iv
+                val encrypted = cipher.doFinal(plainText.toByteArray(Charsets.UTF_8))
+                
+                val combined = ByteArray(iv.size + encrypted.size)
+                System.arraycopy(iv, 0, combined, 0, iv.size)
+                System.arraycopy(encrypted, 0, combined, iv.size, encrypted.size)
+                Base64.encodeToString(combined, Base64.NO_WRAP)
+            } catch (e: Exception) {
+                e.printStackTrace()
+                null
+            }
+        }
+
+        private fun decrypt(encryptedText: String): String? {
+            return try {
+                val combined = Base64.decode(encryptedText, Base64.NO_WRAP)
+                val cipher = Cipher.getInstance("AES/GCM/NoPadding")
+                val keyStore = KeyStore.getInstance("AndroidKeyStore")
+                keyStore.load(null)
+                val secretKey = keyStore.getKey(ALIAS, null) as SecretKey
+                
+                val iv = combined.copyOfRange(0, 12)
+                val encrypted = combined.copyOfRange(12, combined.size)
+                
+                val spec = GCMParameterSpec(128, iv)
+                cipher.init(Cipher.DECRYPT_MODE, secretKey, spec)
+                String(cipher.doFinal(encrypted), Charsets.UTF_8)
+            } catch (e: Exception) {
+                e.printStackTrace()
+                null
+            }
+        }
     }
 
     fun getApiKey(provider: Provider): String? {
-        return prefs.getString("api_key_${provider.name}", null)
+        val encrypted = prefs.getString("api_key_${provider.name}", null) ?: return null
+        return decrypt(encrypted)
     }
 
     fun setApiKey(provider: Provider, key: String) {
-        prefs.edit().putString("api_key_${provider.name}", key).apply()
+        val encrypted = encrypt(key)
+        if (encrypted != null) {
+            prefs.edit { putString("api_key_${provider.name}", encrypted) }
+        }
     }
 
-    fun clearApiKey(provider: Provider) {
-        prefs.edit().remove("api_key_${provider.name}").apply()
-    }
 
     fun getActiveProvider(): Provider {
         val providerName = prefs.getString("active_provider", Provider.ANTHROPIC.name) ?: Provider.ANTHROPIC.name
@@ -45,6 +105,6 @@ class ApiKeyStore(context: Context) {
     }
 
     fun setActiveProvider(provider: Provider) {
-        prefs.edit().putString("active_provider", provider.name).apply()
+        prefs.edit { putString("active_provider", provider.name) }
     }
 }

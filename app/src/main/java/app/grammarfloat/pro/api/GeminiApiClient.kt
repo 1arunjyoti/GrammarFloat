@@ -8,7 +8,7 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 
-class GeminiApiClient : ApiClient {
+object GeminiApiClient : ApiClient {
 
     @Serializable
     private data class GeminiRequest(
@@ -51,12 +51,12 @@ class GeminiApiClient : ApiClient {
             .post(requestBody)
             .build()
 
-        NetworkModule.okHttpClient.newCall(request).execute().use { response ->
+        NetworkModule.okHttpClient.newCall(request).await().use { response ->
             if (!response.isSuccessful) {
                 throw Exception("Gemini API error: ${response.code} ${response.message}")
             }
             
-            val responseBodyString = response.body?.string() ?: throw Exception("Empty response body")
+            val responseBodyString = response.body.string()
             val geminiResponse = NetworkModule.json.decodeFromString<GeminiResponse>(responseBodyString)
             
             geminiResponse.candidates?.firstOrNull()?.content?.parts?.firstOrNull()?.text?.trim() ?: throw Exception("No content in response")
@@ -85,12 +85,12 @@ class GeminiApiClient : ApiClient {
             .post(requestBody)
             .build()
 
-        NetworkModule.okHttpClient.newCall(request).execute().use { response ->
+        NetworkModule.okHttpClient.newCall(request).await().use { response ->
             if (!response.isSuccessful) {
                 throw Exception("Gemini API error: ${response.code} ${response.message}")
             }
             
-            val responseBodyString = response.body?.string() ?: throw Exception("Empty response body")
+            val responseBodyString = response.body.string()
             val geminiResponse = NetworkModule.json.decodeFromString<GeminiResponse>(responseBodyString)
             
             geminiResponse.candidates?.firstOrNull()?.content?.parts?.firstOrNull()?.text?.trim() ?: throw Exception("Could not find explanation in response")
@@ -124,12 +124,12 @@ class GeminiApiClient : ApiClient {
             .post(requestBody)
             .build()
 
-        NetworkModule.okHttpClient.newCall(request).execute().use { response ->
+        NetworkModule.okHttpClient.newCall(request).await().use { response ->
             if (!response.isSuccessful) {
                 throw Exception("Gemini API error: ${response.code} ${response.message}")
             }
             
-            val responseBodyString = response.body?.string() ?: throw Exception("Empty response body")
+            val responseBodyString = response.body.string()
             val geminiResponse = NetworkModule.json.decodeFromString<GeminiResponse>(responseBodyString)
             
             geminiResponse.candidates?.firstOrNull()?.content?.parts?.firstOrNull()?.text?.trim() ?: throw Exception("Could not find text in response")

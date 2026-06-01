@@ -8,7 +8,7 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 
-class AnthropicApiClient : ApiClient {
+object AnthropicApiClient : ApiClient {
 
     @Serializable
     private data class AnthropicRequest(
@@ -52,12 +52,12 @@ class AnthropicApiClient : ApiClient {
             .post(requestBody)
             .build()
 
-        NetworkModule.okHttpClient.newCall(request).execute().use { response ->
+        NetworkModule.okHttpClient.newCall(request).await().use { response ->
             if (!response.isSuccessful) {
                 throw Exception("Anthropic API error: ${response.code} ${response.message}")
             }
             
-            val responseBodyString = response.body?.string() ?: throw Exception("Empty response body")
+            val responseBodyString = response.body.string()
             val anthropicResponse = NetworkModule.json.decodeFromString<AnthropicResponse>(responseBodyString)
             
             anthropicResponse.content?.firstOrNull()?.text?.trim() ?: throw Exception("No content in response")
@@ -87,12 +87,12 @@ class AnthropicApiClient : ApiClient {
             .post(requestBody)
             .build()
 
-        NetworkModule.okHttpClient.newCall(request).execute().use { response ->
+        NetworkModule.okHttpClient.newCall(request).await().use { response ->
             if (!response.isSuccessful) {
                 throw Exception("Anthropic API error: ${response.code} ${response.message}")
             }
             
-            val responseBodyString = response.body?.string() ?: throw Exception("Empty response body")
+            val responseBodyString = response.body.string()
             val anthropicResponse = NetworkModule.json.decodeFromString<AnthropicResponse>(responseBodyString)
             
             anthropicResponse.content?.firstOrNull()?.text?.trim() ?: throw Exception("No content in response")
@@ -127,12 +127,12 @@ class AnthropicApiClient : ApiClient {
             .post(requestBody)
             .build()
 
-        NetworkModule.okHttpClient.newCall(request).execute().use { response ->
+        NetworkModule.okHttpClient.newCall(request).await().use { response ->
             if (!response.isSuccessful) {
                 throw Exception("Anthropic API error: ${response.code} ${response.message}")
             }
             
-            val responseBodyString = response.body?.string() ?: throw Exception("Empty response body")
+            val responseBodyString = response.body.string()
             val anthropicResponse = NetworkModule.json.decodeFromString<AnthropicResponse>(responseBodyString)
             
             anthropicResponse.content?.firstOrNull()?.text?.trim() ?: throw Exception("No content in response")

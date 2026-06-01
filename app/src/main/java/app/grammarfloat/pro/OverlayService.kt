@@ -90,6 +90,7 @@ class OverlayService : Service() {
             showLoading()
         }
 
+        currentCorrectedText = null
         processText(originalText)
     }
 
@@ -114,6 +115,7 @@ class OverlayService : Service() {
 
                 panelController?.showResult(originalText, newText)
             } catch (e: Exception) {
+                if (e is kotlinx.coroutines.CancellationException) throw e
                 e.printStackTrace()
                 panelController?.showError("Error: ${e.message}", onRetry = {
                     processTone(originalText, tone)
@@ -141,6 +143,7 @@ class OverlayService : Service() {
 
                 panelController?.showExplanation(explanation)
             } catch (e: Exception) {
+                if (e is kotlinx.coroutines.CancellationException) throw e
                 e.printStackTrace()
                 panelController?.showExplanation("Error: ${e.message}")
             }
@@ -167,6 +170,7 @@ class OverlayService : Service() {
 
                 panelController?.showResult(originalText, correctedText)
             } catch (e: Exception) {
+                if (e is kotlinx.coroutines.CancellationException) throw e
                 e.printStackTrace()
                 panelController?.showError("Error: ${e.message}", onRetry = {
                     panelController?.showLoading()
@@ -181,6 +185,7 @@ class OverlayService : Service() {
         serviceScope.cancel()
         panelController?.hide()
         panelController = null
+        currentCorrectedText = null
     }
 
     override fun onBind(intent: Intent?): IBinder? {
