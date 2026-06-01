@@ -46,7 +46,11 @@ class ProcessTextActivity : AppCompatActivity() {
         )
         super.onCreate(savedInstanceState)
         
-        val textToProcess = intent.getCharSequenceExtra(Intent.EXTRA_PROCESS_TEXT)?.toString()
+        val textToProcess = if (intent.action == Intent.ACTION_SEND) {
+            intent.getStringExtra(Intent.EXTRA_TEXT)
+        } else {
+            intent.getCharSequenceExtra(Intent.EXTRA_PROCESS_TEXT)?.toString()
+        }
 
         if (textToProcess.isNullOrBlank()) {
             finish()

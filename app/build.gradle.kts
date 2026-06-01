@@ -1,9 +1,29 @@
+import java.util.Properties
+import java.io.FileInputStream
+
 plugins {
   alias(libs.plugins.android.application)
   alias(libs.plugins.kotlin.serialization)
 }
 
+val localProperties = Properties()
+val localPropertiesFile = rootProject.file("local.properties")
+if (localPropertiesFile.exists()) {
+    localProperties.load(FileInputStream(localPropertiesFile))
+}
+
 android {
+    signingConfigs {
+        create("release") {
+            val storeFilePath = localProperties.getProperty("RELEASE_STORE_FILE")
+            if (storeFilePath != null && storeFilePath.isNotBlank()) {
+                storeFile = file(storeFilePath)
+                storePassword = localProperties.getProperty("RELEASE_STORE_PASSWORD") ?: ""
+                keyAlias = localProperties.getProperty("RELEASE_KEY_ALIAS") ?: ""
+                keyPassword = localProperties.getProperty("RELEASE_KEY_PASSWORD") ?: ""
+            }
+        }
+    }
     namespace = "app.grammarfloat.pro"
     compileSdk = 36
     defaultConfig {
@@ -18,6 +38,7 @@ android {
         release {
             isMinifyEnabled = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            signingConfig = signingConfigs.getByName("release")
         }
     }
     compileOptions {
@@ -34,6 +55,10 @@ android {
         excludes += "/META-INF/{AL2.0,LGPL2.1}"
       }
     }
+}
+
+base {
+    archivesName.set("grammar_float-${android.defaultConfig.versionName}")
 }
 
 kotlin {
