@@ -41,6 +41,16 @@ class GrammarAccessibilityService : AccessibilityService() {
     private val handler = Handler(Looper.getMainLooper())
     private val visibilityUpdateRunnable = Runnable { updateTriggerVisibility() }
 
+    private var excludedApps = setOf<String>()
+    private var sharedPrefs: android.content.SharedPreferences? = null
+    private val prefsListener = android.content.SharedPreferences.OnSharedPreferenceChangeListener { prefs, key ->
+        if (key == "excluded_apps") {
+            excludedApps = prefs.getStringSet("excluded_apps", emptySet()) ?: emptySet()
+            handler.removeCallbacks(visibilityUpdateRunnable)
+            handler.post(visibilityUpdateRunnable)
+        }
+    }
+
     private companion object {
         const val DEBOUNCE_MS = 150L
     }
@@ -77,6 +87,10 @@ class GrammarAccessibilityService : AccessibilityService() {
         super.onServiceConnected()
         windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
         createFloatingTrigger()
+
+        sharedPrefs = getSharedPreferences("grammar_float_prefs", Context.MODE_PRIVATE)
+        excludedApps = sharedPrefs?.getStringSet("excluded_apps", emptySet()) ?: emptySet()
+        sharedPrefs?.registerOnSharedPreferenceChangeListener(prefsListener)
 
         val filter = IntentFilter().apply {
             addAction(OverlayService.ACTION_REPLACE_TEXT)
@@ -161,7 +175,10 @@ class GrammarAccessibilityService : AccessibilityService() {
 
     /** Evaluate keyboard + active node state and show/hide the trigger accordingly. */
     private fun updateTriggerVisibility() {
-        if (isKeyboardVisible() && activeNodeInfo != null) {
+        val packageName = activeNodeInfo?.packageName?.toString()
+        val isExcluded = packageName != null && excludedApps.contains(packageName)
+
+        if (isKeyboardVisible() && activeNodeInfo != null && !isExcluded) {
             showFloatingTrigger()
         } else {
             hideFloatingTrigger()
@@ -191,6 +208,9 @@ class GrammarAccessibilityService : AccessibilityService() {
 
         // Cancel any pending debounce callbacks
         handler.removeCallbacks(visibilityUpdateRunnable)
+
+        sharedPrefs?.unregisterOnSharedPreferenceChangeListener(prefsListener)
+        sharedPrefs = null
 
         hideFloatingTrigger()
 

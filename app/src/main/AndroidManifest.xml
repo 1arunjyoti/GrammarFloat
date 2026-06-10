@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <!-- Required: Draw floating overlay on top of other apps -->
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
@@ -12,6 +13,8 @@
 
     <!-- Required: AI API call -->
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Required: Query installed apps for exclusion list -->
+    <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" tools:ignore="QueryAllPackagesPermission" />
 
     <application
         android:name=".GrammarFloatApp"
@@ -41,6 +44,12 @@
             android:exported="false"
             android:theme="@style/Theme.GrammarFloat"
             android:windowSoftInputMode="adjustResize" />
+
+        <activity
+            android:name=".ExcludedAppsActivity"
+            android:exported="false"
+            android:label="Excluded Apps"
+            android:theme="@style/Theme.GrammarFloat" />
 
         <activity
             android:name=".ProcessTextActivity"

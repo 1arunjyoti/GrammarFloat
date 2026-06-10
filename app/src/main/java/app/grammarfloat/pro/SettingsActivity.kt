@@ -153,6 +153,11 @@ class SettingsActivity : AppCompatActivity() {
             val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
             startActivity(intent)
         }
+
+        binding.btnManageExcludedApps.setOnClickListener {
+            val intent = Intent(this, ExcludedAppsActivity::class.java)
+            startActivity(intent)
+        }
     }
 
     private fun updatePermissionStatus() {

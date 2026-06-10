@@ -94,8 +94,13 @@ class OverlayPanelController(context: Context) {
         // Explanation slightly smaller
         binding.tvExplanation.setTextSize(TypedValue.COMPLEX_UNIT_SP, maxOf(12f, fontSize - 2f))
 
+        val metrics = themedContext.resources.displayMetrics
+        val marginPx = android.util.TypedValue.applyDimension(
+            android.util.TypedValue.COMPLEX_UNIT_DIP, 4f, metrics
+        ).toInt()
+
         val params = WindowManager.LayoutParams(
-            WindowManager.LayoutParams.MATCH_PARENT,
+            metrics.widthPixels - (marginPx * 2),
             WindowManager.LayoutParams.WRAP_CONTENT,
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
                 WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
