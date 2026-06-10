@@ -3,6 +3,7 @@ package app.grammarfloat.pro
 import android.content.Intent
 import android.os.Bundle
 import android.provider.Settings
+import android.text.TextUtils
 import android.view.View
 import android.widget.ArrayAdapter
 import android.widget.Toast
@@ -37,6 +38,7 @@ class SettingsActivity : AppCompatActivity() {
 
         setupProviderSpinner()
         setupPermissionButton()
+        setupSeamlessModeButton()
         setupLinks()
         setupSaveButton()
         setupAppearance()
@@ -114,6 +116,7 @@ class SettingsActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         updatePermissionStatus()
+        updateSeamlessModeStatus()
     }
 
     override fun onDestroy() {
@@ -145,6 +148,13 @@ class SettingsActivity : AppCompatActivity() {
         }
     }
 
+    private fun setupSeamlessModeButton() {
+        binding.btnToggleSeamlessMode.setOnClickListener {
+            val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
+            startActivity(intent)
+        }
+    }
+
     private fun updatePermissionStatus() {
         if (Settings.canDrawOverlays(this)) {
             binding.tvPermissionStatus.text = getString(R.string.status_granted)
@@ -155,6 +165,70 @@ class SettingsActivity : AppCompatActivity() {
             binding.tvPermissionStatus.setTextColor("#F44336".toColorInt())
             binding.btnGrantPermission.visibility = View.VISIBLE
         }
+    }
+
+    private fun updateSeamlessModeStatus() {
+        val accessibilityEnabled = isAccessibilityServiceEnabled()
+        val overlayEnabled = Settings.canDrawOverlays(this)
+
+        if (accessibilityEnabled && overlayEnabled) {
+            binding.tvSeamlessModeStatus.text = getString(R.string.seamless_mode_status_enabled)
+            binding.tvSeamlessModeStatus.setTextColor("#4CAF50".toColorInt())
+            binding.btnToggleSeamlessMode.text = getString(R.string.disable_seamless_mode)
+        } else if (accessibilityEnabled && !overlayEnabled) {
+            // Accessibility is on but overlay permission is missing —
+            // the floating trigger button won't be able to draw.
+            binding.tvSeamlessModeStatus.text = "Enabled, but overlay permission required"
+            binding.tvSeamlessModeStatus.setTextColor("#FF9800".toColorInt())
+            binding.btnToggleSeamlessMode.text = getString(R.string.grant_permission)
+            // Re-point button to overlay settings instead
+            binding.btnToggleSeamlessMode.setOnClickListener {
+                val intent = Intent(
+                    Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                    "package:$packageName".toUri()
+                )
+                startActivity(intent)
+            }
+        } else {
+            binding.tvSeamlessModeStatus.text = getString(R.string.seamless_mode_status_disabled)
+            binding.tvSeamlessModeStatus.setTextColor("#F44336".toColorInt())
+            binding.btnToggleSeamlessMode.text = getString(R.string.enable_seamless_mode)
+            // Reset button to point to accessibility settings
+            binding.btnToggleSeamlessMode.setOnClickListener {
+                val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
+                startActivity(intent)
+            }
+        }
+    }
+
+    private fun isAccessibilityServiceEnabled(): Boolean {
+        var accessibilityEnabled = 0
+        val service = packageName + "/" + GrammarAccessibilityService::class.java.canonicalName
+        try {
+            accessibilityEnabled = Settings.Secure.getInt(
+                contentResolver,
+                Settings.Secure.ACCESSIBILITY_ENABLED
+            )
+        } catch (e: Settings.SettingNotFoundException) {
+            // Ignored
+        }
+        val colonSplitter = TextUtils.SimpleStringSplitter(':')
+        if (accessibilityEnabled == 1) {
+            val settingValue = Settings.Secure.getString(
+                contentResolver,
+                Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES
+            )
+            if (settingValue != null) {
+                colonSplitter.setString(settingValue)
+                while (colonSplitter.hasNext()) {
+                    val accessibilityService = colonSplitter.next()
+                    if (accessibilityService.equals(service, ignoreCase = true)) {
+                        return true
+                    }
+                }
+            }
+        }
+        return false
     }
 
     private fun setupLinks() {

@@ -37,4 +37,13 @@
     <string name="appearance">Appearance</string>
     <string name="font_size">Overlay Font Size: %1$d sp</string>
     <string name="font_size_preview">Preview Text</string>
+    
+    <!-- Accessibility / Seamless Mode -->
+    <string name="accessibility_service_description">GrammarFloat seamless mode. Displays a floating button when typing to quickly check grammar.</string>
+    <string name="seamless_mode_title">Seamless Mode (Accessibility)</string>
+    <string name="seamless_mode_desc">Adds a floating trigger near text fields for a seamless grammar check without selecting text manually. Requires Accessibility permission.</string>
+    <string name="enable_seamless_mode">Enable in Settings</string>
+    <string name="disable_seamless_mode">Disable in Settings</string>
+    <string name="seamless_mode_status_enabled">Status: Enabled</string>
+    <string name="seamless_mode_status_disabled">Status: Action Required</string>
 </resources>
