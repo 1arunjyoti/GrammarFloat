@@ -38,6 +38,7 @@ class AppExclusionAdapter(
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val app = apps[position]
         holder.ivAppIcon.setImageDrawable(app.icon)
+        holder.ivAppIcon.contentDescription = app.name
         holder.tvAppName.text = app.name
         holder.tvAppPackage.text = app.packageName
         

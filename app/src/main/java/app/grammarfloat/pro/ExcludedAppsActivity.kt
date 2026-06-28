@@ -21,6 +21,8 @@ class ExcludedAppsActivity : AppCompatActivity() {
     private lateinit var recyclerView: RecyclerView
     private lateinit var progressBar: ProgressBar
     private lateinit var adapter: AppExclusionAdapter
+    private lateinit var btnToggleAll: com.google.android.material.button.MaterialButton
+    private var appList = listOf<AppItem>()
 
     companion object {
         const val PREFS_NAME = "grammar_float_prefs"
@@ -38,12 +40,36 @@ class ExcludedAppsActivity : AppCompatActivity() {
 
         recyclerView = findViewById(R.id.recyclerView)
         progressBar = findViewById(R.id.progressBar)
+        btnToggleAll = findViewById(R.id.btnToggleAll)
+        
+        btnToggleAll.setOnClickListener {
+            val allExcluded = appList.isNotEmpty() && appList.all { it.isExcluded }
+            val newState = !allExcluded
+            
+            val prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            val currentSet = prefs.getStringSet(KEY_EXCLUDED_APPS, emptySet()) ?: emptySet()
+            val newSet = HashSet(currentSet)
+            
+            appList.forEach { appItem ->
+                appItem.isExcluded = newState
+                if (newState) {
+                    newSet.add(appItem.packageName)
+                } else {
+                    newSet.remove(appItem.packageName)
+                }
+            }
+            prefs.edit().putStringSet(KEY_EXCLUDED_APPS, newSet).apply()
+            
+            adapter.notifyDataSetChanged()
+            updateToggleAllButton()
+        }
 
         recyclerView.layoutManager = LinearLayoutManager(this)
         
         // Initialize with empty list
         adapter = AppExclusionAdapter(emptyList()) { appItem, isExcluded ->
             updateExclusionPreference(appItem.packageName, isExcluded)
+            updateToggleAllButton()
         }
         recyclerView.adapter = adapter
 
@@ -55,7 +81,7 @@ class ExcludedAppsActivity : AppCompatActivity() {
         recyclerView.visibility = View.GONE
 
         lifecycleScope.launch {
-            val appList = withContext(Dispatchers.IO) {
+            appList = withContext(Dispatchers.IO) {
                 val pm = packageManager
                 val packages = pm.getInstalledApplications(PackageManager.GET_META_DATA)
                 
@@ -84,6 +110,8 @@ class ExcludedAppsActivity : AppCompatActivity() {
             adapter.updateData(appList)
             progressBar.visibility = View.GONE
             recyclerView.visibility = View.VISIBLE
+            btnToggleAll.visibility = View.VISIBLE
+            updateToggleAllButton()
         }
     }
 
@@ -99,5 +127,10 @@ class ExcludedAppsActivity : AppCompatActivity() {
         }
         
         prefs.edit().putStringSet(KEY_EXCLUDED_APPS, newSet).apply()
+    }
+    
+    private fun updateToggleAllButton() {
+        val allExcluded = appList.isNotEmpty() && appList.all { it.isExcluded }
+        btnToggleAll.text = if (allExcluded) getString(R.string.include_all) else getString(R.string.exclude_all)
     }
 }

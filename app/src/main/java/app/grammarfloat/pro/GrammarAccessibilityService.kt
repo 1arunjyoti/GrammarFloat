@@ -22,6 +22,7 @@ import android.widget.ImageView
 import androidx.core.content.ContextCompat
 import kotlin.math.abs
 
+@Suppress("DEPRECATION")
 class GrammarAccessibilityService : AccessibilityService() {
 
     private var windowManager: WindowManager? = null
@@ -44,8 +45,8 @@ class GrammarAccessibilityService : AccessibilityService() {
     private var excludedApps = setOf<String>()
     private var sharedPrefs: android.content.SharedPreferences? = null
     private val prefsListener = android.content.SharedPreferences.OnSharedPreferenceChangeListener { prefs, key ->
-        if (key == "excluded_apps") {
-            excludedApps = prefs.getStringSet("excluded_apps", emptySet()) ?: emptySet()
+        if (key == ExcludedAppsActivity.KEY_EXCLUDED_APPS) {
+            excludedApps = prefs.getStringSet(ExcludedAppsActivity.KEY_EXCLUDED_APPS, emptySet()) ?: emptySet()
             handler.removeCallbacks(visibilityUpdateRunnable)
             handler.post(visibilityUpdateRunnable)
         }
@@ -88,8 +89,8 @@ class GrammarAccessibilityService : AccessibilityService() {
         windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
         createFloatingTrigger()
 
-        sharedPrefs = getSharedPreferences("grammar_float_prefs", Context.MODE_PRIVATE)
-        excludedApps = sharedPrefs?.getStringSet("excluded_apps", emptySet()) ?: emptySet()
+        sharedPrefs = getSharedPreferences(ExcludedAppsActivity.PREFS_NAME, Context.MODE_PRIVATE)
+        excludedApps = sharedPrefs?.getStringSet(ExcludedAppsActivity.KEY_EXCLUDED_APPS, emptySet()) ?: emptySet()
         sharedPrefs?.registerOnSharedPreferenceChangeListener(prefsListener)
 
         val filter = IntentFilter().apply {
@@ -235,7 +236,7 @@ class GrammarAccessibilityService : AccessibilityService() {
     }
 
     private fun createFloatingTrigger() {
-        val prefs = getSharedPreferences("grammar_float_prefs", Context.MODE_PRIVATE)
+        val prefs = getSharedPreferences(ExcludedAppsActivity.PREFS_NAME, Context.MODE_PRIVATE)
 
         windowLayoutParams = WindowManager.LayoutParams(
             WindowManager.LayoutParams.WRAP_CONTENT,
@@ -334,7 +335,7 @@ class GrammarAccessibilityService : AccessibilityService() {
             windowManager?.addView(floatingTriggerView, windowLayoutParams)
             isTriggerVisible = true
         } catch (e: Exception) {
-            e.printStackTrace()
+            android.util.Log.e("GrammarAccessibility", "Failed to show floating trigger", e)
         }
     }
 
@@ -368,7 +369,7 @@ class GrammarAccessibilityService : AccessibilityService() {
                 startService(serviceIntent)
             }
         } catch (e: Exception) {
-            e.printStackTrace()
+            android.util.Log.e("GrammarAccessibility", "Failed to start overlay service", e)
             isAwaitingReplacement = false
         }
     }

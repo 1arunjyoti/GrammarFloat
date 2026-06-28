@@ -12,8 +12,8 @@ class MaxHeightScrollView @JvmOverloads constructor(
 
     init {
         val displayMetrics = context.resources.displayMetrics
-        // Set max height to 45% of the screen height
-        maxHeight = (displayMetrics.heightPixels * 0.45).toInt()
+        // Set max height to 50% of the screen height
+        maxHeight = (displayMetrics.heightPixels * 0.50).toInt()
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {

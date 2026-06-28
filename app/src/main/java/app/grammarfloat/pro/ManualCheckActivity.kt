@@ -74,6 +74,9 @@ class ManualCheckActivity : AppCompatActivity() {
         val chipProfessional: Chip = findViewById(R.id.chipProfessional)
         val chipCasual: Chip = findViewById(R.id.chipCasual)
         val chipShorten: Chip = findViewById(R.id.chipShorten)
+        val chipExpand: Chip = findViewById(R.id.chipExpand)
+        val chipFormal: Chip = findViewById(R.id.chipFormal)
+        val chipFriendly: Chip = findViewById(R.id.chipFriendly)
 
         // Make the EditText scrollable inside the NestedScrollView
         etInputText.setOnTouchListener { view, event ->
@@ -130,6 +133,9 @@ class ManualCheckActivity : AppCompatActivity() {
         chipProfessional.setOnClickListener { processTone("Professional") }
         chipCasual.setOnClickListener { processTone("Casual") }
         chipShorten.setOnClickListener { processTone("Shorten") }
+        chipExpand.setOnClickListener { processTone("Expand") }
+        chipFormal.setOnClickListener { processTone("Formal") }
+        chipFriendly.setOnClickListener { processTone("Friendly") }
     }
 
     private fun showLoading() {
@@ -143,89 +149,12 @@ class ManualCheckActivity : AppCompatActivity() {
         layoutError.visibility = View.GONE
         layoutResult.visibility = View.VISIBLE
         
-        tvCorrectedText.text = getHighlightedText(original, corrected)
+        val isNightMode = (resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK) == android.content.res.Configuration.UI_MODE_NIGHT_YES
+        tvCorrectedText.text = app.grammarfloat.pro.ui.TextDiffHighlighter.getHighlightedText(original, corrected, isNightMode)
         layoutExplanation.visibility = View.GONE
         layoutToneChips.visibility = View.GONE
     }
 
-    private fun getHighlightedText(original: String, corrected: String): android.text.SpannableString {
-        val spannable = android.text.SpannableString(corrected)
-        
-        val pattern = java.util.regex.Pattern.compile("\\w+|\\W+")
-        fun tokenize(text: String): List<String> {
-            val tokens = mutableListOf<String>()
-            val matcher = pattern.matcher(text)
-            while (matcher.find()) {
-                tokens.add(matcher.group())
-            }
-            return tokens
-        }
-        
-        val origWords = tokenize(original)
-        val corrWords = tokenize(corrected)
-        
-        // Simple O(N*M) LCS to find matching words
-        val dp = Array(origWords.size + 1) { IntArray(corrWords.size + 1) }
-        for (i in 1..origWords.size) {
-            for (j in 1..corrWords.size) {
-                if (origWords[i-1] == corrWords[j-1]) {
-                    dp[i][j] = dp[i-1][j-1] + 1
-                } else {
-                    dp[i][j] = maxOf(dp[i-1][j], dp[i][j-1])
-                }
-            }
-        }
-        
-        // Backtrack to find matching indices in corrWords
-        val matches = BooleanArray(corrWords.size)
-        var i = origWords.size
-        var j = corrWords.size
-        while (i > 0 && j > 0) {
-            if (origWords[i-1] == corrWords[j-1]) {
-                matches[j-1] = true
-                i--
-                j--
-            } else if (dp[i-1][j] > dp[i][j-1]) {
-                i--
-            } else {
-                j--
-            }
-        }
-        
-        // Now apply spans
-        var currentIndex = 0
-        
-        val isNightMode = (resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK) == android.content.res.Configuration.UI_MODE_NIGHT_YES
-        val color = if (isNightMode) "#81C784".toColorInt() else "#2E7D32".toColorInt()
-        val bgColor = if (isNightMode) "#1B5E20".toColorInt() else "#E8F5E9".toColorInt()
-        
-        for (k in corrWords.indices) {
-            val word = corrWords[k]
-            // Only highlight words that don't match AND are actual word characters (ignore whitespace/punctuation differences)
-            if (!matches[k] && word.matches(Regex(".*\\w.*"))) {
-                spannable.setSpan(
-                    android.text.style.ForegroundColorSpan(color),
-                    currentIndex,
-                    currentIndex + word.length,
-                    android.text.Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-                )
-                spannable.setSpan(
-                    android.text.style.StyleSpan(android.graphics.Typeface.BOLD),
-                    currentIndex,
-                    currentIndex + word.length,
-                    android.text.Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-                )
-                spannable.setSpan(
-                    android.text.style.BackgroundColorSpan(bgColor),
-                    currentIndex,
-                    currentIndex + word.length,
-                    android.text.Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-                )
-            }
-            currentIndex += word.length
-        }
-        return spannable
-    }
 
     private fun showError(message: String) {
         layoutLoading.visibility = View.GONE
@@ -244,7 +173,7 @@ class ManualCheckActivity : AppCompatActivity() {
                 showResult(originalText, correctedText)
             } catch (e: Exception) {
                 if (e is kotlinx.coroutines.CancellationException) throw e
-                e.printStackTrace()
+                android.util.Log.e("ManualCheckActivity", "Failed to check grammar", e)
                 if (e is MissingApiKeyException) {
                     showError(e.message ?: "API key missing")
                 } else {
@@ -265,7 +194,7 @@ class ManualCheckActivity : AppCompatActivity() {
                 showResult(originalText, newText)
             } catch (e: Exception) {
                 if (e is kotlinx.coroutines.CancellationException) throw e
-                e.printStackTrace()
+                android.util.Log.e("ManualCheckActivity", "Failed to adjust tone", e)
                 showError("Error: ${e.message}")
             }
         }
@@ -289,7 +218,7 @@ class ManualCheckActivity : AppCompatActivity() {
                 tvExplanation.text = explanation
             } catch (e: Exception) {
                 if (e is kotlinx.coroutines.CancellationException) throw e
-                e.printStackTrace()
+                android.util.Log.e("ManualCheckActivity", "Failed to explain correction", e)
                 progressExplanation.visibility = View.GONE
                 tvExplanation.visibility = View.VISIBLE
                 tvExplanation.text = "Error: ${e.message}"

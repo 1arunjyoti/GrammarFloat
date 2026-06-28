@@ -11,6 +11,7 @@ class SettingsStore(context: Context) {
         private const val KEY_OVERLAY_FONT_SIZE = "overlay_font_size"
         const val DEFAULT_OVERLAY_FONT_SIZE = 16f
         private const val KEY_THEME_MODE = "theme_mode"
+        const val DEFAULT_THEME_MODE = androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
     }
 
     fun getOverlayFontSize(): Float {
@@ -22,7 +23,7 @@ class SettingsStore(context: Context) {
     }
 
     fun getThemeMode(): Int {
-        return prefs.getInt(KEY_THEME_MODE, androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
+        return prefs.getInt(KEY_THEME_MODE, DEFAULT_THEME_MODE)
     }
 
     fun setThemeMode(mode: Int) {

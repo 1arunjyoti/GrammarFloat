@@ -1,5 +1,9 @@
 # GrammarFloat - AI-Powered Grammar Correction and Text Enhancement for Android
 
+|                        App Screen 1                         |                         App Screen 2                         |                         Overlay                          |
+|:-----------------------------------------------------------:|:------------------------------------------------------------:|:--------------------------------------------------------:|
+| <img src="assets/screenshots/app_screen.png" height="400"/> | <img src="assets/screenshots/app_screen2.png" height="400"/> | <img src="assets/screenshots/overlay.png" height="400"/> |
+
 ## Project Description
 
 GrammarFloat is a native Android application that enhances the system-wide text selection context menu by adding a **"Check Grammar"** option. When a user long-presses text in any app and selects this option, a floating overlay panel appears without forcing the user to leave their current app. 

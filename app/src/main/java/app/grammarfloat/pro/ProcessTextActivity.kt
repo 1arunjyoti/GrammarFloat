@@ -14,6 +14,8 @@ import android.widget.Toast
 
 class ProcessTextActivity : AppCompatActivity() {
 
+    private var isReceiverRegistered = false
+
     private val receiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             if (intent?.action == OverlayService.ACTION_REPLACE_TEXT) {
@@ -62,6 +64,7 @@ class ProcessTextActivity : AppCompatActivity() {
             addAction(OverlayService.ACTION_CANCEL_TEXT)
         }
         androidx.core.content.ContextCompat.registerReceiver(this, receiver, filter, androidx.core.content.ContextCompat.RECEIVER_NOT_EXPORTED)
+        isReceiverRegistered = true
 
         processIntent(intent)
     }
@@ -96,17 +99,20 @@ class ProcessTextActivity : AppCompatActivity() {
                 startService(serviceIntent)
             }
         } catch (e: Exception) {
-            e.printStackTrace()
+            android.util.Log.e("ProcessTextActivity", "Failed to start overlay service", e)
             Toast.makeText(this, "Failed to start overlay service: ${e.message}", Toast.LENGTH_LONG).show()
         }
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        try {
-            unregisterReceiver(receiver)
-        } catch (e: Exception) {
-            // Ignore if already unregistered
+        if (isReceiverRegistered) {
+            try {
+                unregisterReceiver(receiver)
+            } catch (e: Exception) {
+                // Ignore if already unregistered
+            }
+            isReceiverRegistered = false
         }
     }
 }

@@ -22,11 +22,7 @@ suspend fun Call.await(): Response {
         })
 
         continuation.invokeOnCancellation {
-            try {
-                cancel()
-            } catch (ex: Throwable) {
-                // Ignore cancel exception
-            }
+            runCatching { cancel() }
         }
     }
 }

@@ -24,6 +24,9 @@
     <string name="professional">Professional</string>
     <string name="casual">Casual</string>
     <string name="shorten">Shorten</string>
+    <string name="expand">Expand</string>
+    <string name="formal">Formal</string>
+    <string name="friendly">Friendly</string>
     <string name="retry">Retry</string>
     <string name="status_granted">Status: Granted</string>
     <string name="status_action_required">Status: Action Required</string>
@@ -46,4 +49,26 @@
     <string name="disable_seamless_mode">Disable in Settings</string>
     <string name="seamless_mode_status_enabled">Status: Enabled</string>
     <string name="seamless_mode_status_disabled">Status: Action Required</string>
+    
+    <!-- New strings from Layouts -->
+    <string name="manual_grammar_check">Manual Grammar Check</string>
+    <string name="open_editor">Open Editor</string>
+    <string name="manual_check_desc">Paste or type text to instantly check its grammar without needing to use the selection popup.</string>
+    <string name="manage_excluded_apps">Manage Excluded Apps</string>
+    <string name="theme_mode">Theme Mode</string>
+    <string name="theme_system">System</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_dark">Dark</string>
+    <string name="show_more">Show more</string>
+    <string name="show_less">Show less</string>
+    <string name="exclude_all">Exclude All</string>
+    <string name="include_all">Include All</string>
+    <string name="test_overlay_mock_data">Test Overlay (Mock Data)</string>
+    
+    <string name="manual_check_title">Manual Check</string>
+    <string name="paste_text_hint">Paste or type text to check</string>
+    <string name="action_check_grammar">Check Grammar</string>
+    <string name="correction">Correction</string>
+    
+    <string name="excluded_apps_title">Excluded Apps</string>
 </resources>

@@ -19,7 +19,6 @@
         android:paddingStart="16dp"
         android:paddingEnd="16dp"
         android:paddingBottom="12dp"
-        android:paddingTop="12dp"
         android:animateLayoutChanges="true">
 
         <LinearLayout
@@ -28,13 +27,21 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <!-- Drag Handle Indicator -->
-            <View
-                android:layout_width="48dp"
-                android:layout_height="4dp"
+            <!-- Drag Handle Area -->
+            <FrameLayout
+                android:id="@+id/dragHandleArea"
+                android:layout_width="120dp"
+                android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
-                android:layout_marginBottom="4dp"
-                android:background="@drawable/drag_handle_bg" />
+                android:paddingTop="12dp"
+                android:paddingBottom="4dp">
+                
+                <View
+                    android:layout_width="48dp"
+                    android:layout_height="4dp"
+                    android:layout_gravity="center"
+                    android:background="@drawable/drag_handle_bg" />
+            </FrameLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -114,6 +121,7 @@
             android:visibility="gone">
 
             <app.grammarfloat.pro.ui.MaxHeightScrollView
+                android:id="@+id/scrollContent"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:scrollbars="vertical"
@@ -130,16 +138,76 @@
                         android:layout_height="wrap_content"
                         android:textColor="@color/overlay_text_secondary"
                         android:textSize="14sp"
+                        android:maxLines="3"
+                        android:ellipsize="end"
                         tools:text="This are a bad sentence." />
+                        
+                    <TextView
+                        android:id="@+id/tvExpandOriginal"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal"
+                        android:layout_marginTop="4dp"
+                        android:text="@string/show_more"
+                        android:textColor="?attr/colorPrimary"
+                        android:textSize="12sp"
+                        android:textStyle="bold"
+                        android:paddingHorizontal="16dp"
+                        android:paddingVertical="4dp"
+                        android:visibility="gone"
+                        android:background="@android:color/transparent" />
+                        
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:layout_marginTop="8dp"
+                        android:layout_marginBottom="8dp"
+                        android:background="@color/overlay_stroke" />
 
                     <TextView
                         android:id="@+id/tvCorrectedText"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
                         android:textColor="@color/overlay_text_primary"
                         android:textSize="16sp"
                         tools:text="This is a bad sentence." />
+
+                    <!-- Explanation Area -->
+                    <LinearLayout
+                        android:id="@+id/layoutExplanation"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:layout_marginTop="8dp"
+                        android:paddingTop="8dp"
+                        android:visibility="gone">
+                        
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="1dp"
+                            android:background="@color/overlay_stroke"
+                            android:layout_marginBottom="8dp" />
+
+                        <ProgressBar
+                            android:id="@+id/progressExplanation"
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:layout_gravity="center"
+                            android:indeterminate="true"
+                            android:visibility="gone" />
+
+                        <TextView
+                            android:id="@+id/tvExplanation"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:textColor="@color/overlay_text_secondary"
+                            android:textSize="13sp"
+                            android:textStyle="italic"
+                            android:visibility="gone"
+                            tools:text="Changed 'is' to 'are' to match the plural subject." />
+                    </LinearLayout>
+
+
                 </LinearLayout>
             </app.grammarfloat.pro.ui.MaxHeightScrollView>
 
@@ -156,7 +224,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:minWidth="0dp"
-                    android:paddingHorizontal="12dp"
+                    android:paddingHorizontal="8dp"
                     android:text="@string/why" />
 
                 <com.google.android.material.button.MaterialButton
@@ -165,7 +233,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:minWidth="0dp"
-                    android:paddingHorizontal="12dp"
+                    android:paddingHorizontal="8dp"
                     android:text="@string/tone" />
 
                 <View
@@ -179,7 +247,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:minWidth="0dp"
-                    android:paddingHorizontal="12dp"
+                    android:paddingHorizontal="8dp"
                     android:text="@string/copy" />
 
                 <com.google.android.material.button.MaterialButton
@@ -189,43 +257,8 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="4dp"
                     android:minWidth="0dp"
-                    android:paddingHorizontal="16dp"
+                    android:paddingHorizontal="8dp"
                     android:text="@string/replace" />
-            </LinearLayout>
-
-            <!-- Explanation Area -->
-            <LinearLayout
-                android:id="@+id/layoutExplanation"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:layout_marginTop="8dp"
-                android:paddingTop="8dp"
-                android:visibility="gone">
-                
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:background="@color/overlay_stroke"
-                    android:layout_marginBottom="8dp" />
-
-                <ProgressBar
-                    android:id="@+id/progressExplanation"
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:layout_gravity="center"
-                    android:indeterminate="true"
-                    android:visibility="gone" />
-
-                <TextView
-                    android:id="@+id/tvExplanation"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:textColor="@color/overlay_text_secondary"
-                    android:textSize="13sp"
-                    android:textStyle="italic"
-                    android:visibility="gone"
-                    tools:text="Changed 'is' to 'are' to match the plural subject." />
             </LinearLayout>
 
             <!-- Tone Chips Area -->
@@ -261,8 +294,30 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="8dp"
                         android:text="@string/shorten" />
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chipExpand"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:text="@string/expand" />
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chipFormal"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:text="@string/formal" />
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chipFriendly"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:text="@string/friendly" />
                 </LinearLayout>
             </HorizontalScrollView>
+
         </LinearLayout>
 
         <!-- Error State -->

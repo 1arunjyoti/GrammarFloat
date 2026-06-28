@@ -97,7 +97,7 @@ class SettingsActivity : AppCompatActivity() {
             }
             
             val intent = Intent(this, OverlayService::class.java).apply {
-                putExtra("EXTRA_TEXT", "This are a test of the mock overlay.")
+                putExtra("EXTRA_TEXT", "This are a test of the mock overlay. We needs to add more text to make sure that the scrollview is actually working correctly when the text is very long. Its important to test the bounds of the UI, specially when users pastes entire emails or essays into the text field. This should be long enough to trigger the max height constraint and enable vertical scrolling.\n\nFurthermore, we is testing how the system handles multiple paragraphs. Somtimes people write really long messages without stopping to check their grammer. For instance, when writing a very passionate email to customer support, they might type furiously. The overlay must be capable of displaying all of this text without breaking the layout or pushing the buttons off the screen.\n\nIn conclusion, having a robust UI that scales dynamically based on content size are a hallmark of a well-designed application. If the text becomes too long, the internal scrollview should take over while keeping the header and the bottom action buttons visible at all times. Let us see if this massive wall of text does the trick!")
                 putExtra(OverlayService.EXTRA_IS_MOCK_TEST, true)
             }
             try {
@@ -107,7 +107,7 @@ class SettingsActivity : AppCompatActivity() {
                     startService(intent)
                 }
             } catch (e: Exception) {
-                e.printStackTrace()
+                android.util.Log.e("SettingsActivity", "Failed to start overlay service", e)
                 Toast.makeText(this, "Failed to start overlay service: ${e.message}", Toast.LENGTH_LONG).show()
             }
         }
@@ -259,15 +259,20 @@ class SettingsActivity : AppCompatActivity() {
                 
                 activityScope.launch {
                     try {
-                        val apiClient = ApiClientFactory.create(provider)
-                        // Send a tiny payload to test auth headers
-                        apiClient.checkGrammar("Test.", key)
+                        val apiClient = ApiClientFactory.get(provider)
+                        // Send a tiny deliberately-wrong payload to test auth headers
+                        apiClient.checkGrammar("I is a engineer.", key)
                         
-                        store.setApiKey(provider, key)
-                        store.setActiveProvider(provider)
-                        Toast.makeText(this@SettingsActivity, R.string.key_verified_saved, Toast.LENGTH_SHORT).show()
+                        if (store.setApiKey(provider, key)) {
+                            store.setActiveProvider(provider)
+                            Toast.makeText(this@SettingsActivity, R.string.key_verified_saved, Toast.LENGTH_SHORT).show()
+                        } else {
+                            Toast.makeText(this@SettingsActivity, "Failed to save API key", Toast.LENGTH_LONG).show()
+                        }
+                    } catch (e: app.grammarfloat.pro.api.ApiException.InvalidKey) {
+                        Toast.makeText(this@SettingsActivity, "Invalid API key", Toast.LENGTH_LONG).show()
                     } catch (e: Exception) {
-                        Toast.makeText(this@SettingsActivity, getString(R.string.invalid_key, e.message), Toast.LENGTH_LONG).show()
+                        Toast.makeText(this@SettingsActivity, "Validation failed: ${e.message}", Toast.LENGTH_LONG).show()
                     } finally {
                         binding.btnSaveKey.isEnabled = true
                         binding.btnSaveKey.text = getString(R.string.save_key)

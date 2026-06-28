@@ -67,9 +67,17 @@ class OverlayPanelController(context: Context) {
         }
 
         binding.btnWhy.setOnClickListener {
-            binding.btnWhy.visibility = View.GONE
-            showExplanationLoading()
-            onExplain?.invoke()
+            if (binding.layoutExplanation.isVisible) {
+                binding.layoutExplanation.visibility = View.GONE
+            } else {
+                if (binding.tvExplanation.text.isNotEmpty()) {
+                    binding.layoutExplanation.visibility = View.VISIBLE
+                    binding.scrollContent.post { binding.scrollContent.fullScroll(View.FOCUS_DOWN) }
+                } else {
+                    showExplanationLoading()
+                    onExplain?.invoke()
+                }
+            }
         }
 
         binding.btnAdjustTone.setOnClickListener {
@@ -83,8 +91,23 @@ class OverlayPanelController(context: Context) {
         binding.chipProfessional.setOnClickListener { onAdjustTone?.invoke("professional") }
         binding.chipCasual.setOnClickListener { onAdjustTone?.invoke("casual") }
         binding.chipShorten.setOnClickListener { onAdjustTone?.invoke("shorten") }
+        binding.chipExpand.setOnClickListener { onAdjustTone?.invoke("expand") }
+        binding.chipFormal.setOnClickListener { onAdjustTone?.invoke("formal") }
+        binding.chipFriendly.setOnClickListener { onAdjustTone?.invoke("friendly") }
+        
+        binding.tvExpandOriginal.setOnClickListener {
+            android.transition.TransitionManager.beginDelayedTransition(binding.root as android.view.ViewGroup)
+            if (binding.tvOriginalText.maxLines == 3) {
+                binding.tvOriginalText.maxLines = Integer.MAX_VALUE
+                binding.tvExpandOriginal.text = context.getString(app.grammarfloat.pro.R.string.show_less)
+            } else {
+                binding.tvOriginalText.maxLines = 3
+                binding.tvExpandOriginal.text = context.getString(app.grammarfloat.pro.R.string.show_more)
+            }
+        }
     }
 
+    @Suppress("DEPRECATION")
     fun show() {
         if (isAdded) return
 
@@ -93,6 +116,13 @@ class OverlayPanelController(context: Context) {
         binding.tvCorrectedText.setTextSize(TypedValue.COMPLEX_UNIT_SP, fontSize)
         // Explanation slightly smaller
         binding.tvExplanation.setTextSize(TypedValue.COMPLEX_UNIT_SP, maxOf(12f, fontSize - 2f))
+        
+        // Buttons scaled relative to main font size, but clamped at 16sp to prevent horizontal overflow on narrow screens
+        val buttonFontSize = minOf(16f, maxOf(12f, fontSize - 2f))
+        binding.btnWhy.setTextSize(TypedValue.COMPLEX_UNIT_SP, buttonFontSize)
+        binding.btnAdjustTone.setTextSize(TypedValue.COMPLEX_UNIT_SP, buttonFontSize)
+        binding.btnCopy.setTextSize(TypedValue.COMPLEX_UNIT_SP, buttonFontSize)
+        binding.btnReplace.setTextSize(TypedValue.COMPLEX_UNIT_SP, buttonFontSize)
 
         val metrics = themedContext.resources.displayMetrics
         val marginPx = android.util.TypedValue.applyDimension(
@@ -121,7 +151,7 @@ class OverlayPanelController(context: Context) {
         var initialTouchY = 0f
         var velocityTracker: android.view.VelocityTracker? = null
 
-        binding.layoutTitleBar.setOnTouchListener { _, event ->
+        binding.dragHandleArea.setOnTouchListener { _, event ->
             when (event.actionMasked) {
                 android.view.MotionEvent.ACTION_DOWN -> {
                     initialX = params.x
@@ -222,7 +252,7 @@ class OverlayPanelController(context: Context) {
             windowManager.addView(binding.root, params)
             isAdded = true
         } catch (e: Exception) {
-            e.printStackTrace()
+            android.util.Log.e("OverlayPanelCtrl", "Failed to add view", e)
         }
     }
 
@@ -248,12 +278,25 @@ class OverlayPanelController(context: Context) {
         binding.layoutResult.visibility = View.VISIBLE
         binding.layoutError.visibility = View.GONE
         binding.layoutExplanation.visibility = View.GONE
+        binding.tvExplanation.text = ""
         binding.btnWhy.visibility = View.VISIBLE
         binding.layoutToneChips.visibility = View.GONE
         binding.btnAdjustTone.visibility = View.VISIBLE
 
+        val isNightMode = (binding.root.context.resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK) == android.content.res.Configuration.UI_MODE_NIGHT_YES
         binding.tvOriginalText.text = originalText
-        binding.tvCorrectedText.text = getHighlightedText(originalText, correctedText)
+        binding.tvCorrectedText.text = TextDiffHighlighter.getHighlightedText(originalText, correctedText, isNightMode)
+        
+        binding.tvOriginalText.maxLines = 3
+        binding.tvExpandOriginal.text = binding.root.context.getString(app.grammarfloat.pro.R.string.show_more)
+        binding.tvOriginalText.post {
+            val layout = binding.tvOriginalText.layout
+            if (layout != null && layout.getEllipsisCount(layout.lineCount - 1) > 0) {
+                binding.tvExpandOriginal.visibility = View.VISIBLE
+            } else {
+                binding.tvExpandOriginal.visibility = View.GONE
+            }
+        }
     }
 
     fun showExplanationLoading() {
@@ -267,87 +310,9 @@ class OverlayPanelController(context: Context) {
         binding.progressExplanation.visibility = View.GONE
         binding.tvExplanation.visibility = View.VISIBLE
         binding.tvExplanation.text = explanation
+        binding.scrollContent.post { binding.scrollContent.fullScroll(View.FOCUS_DOWN) }
     }
 
-    private fun getHighlightedText(original: String, corrected: String): android.text.SpannableString {
-        val spannable = android.text.SpannableString(corrected)
-        
-        val pattern = java.util.regex.Pattern.compile("\\w+|\\W+")
-        fun tokenize(text: String): List<String> {
-            val tokens = mutableListOf<String>()
-            val matcher = pattern.matcher(text)
-            while (matcher.find()) {
-                tokens.add(matcher.group())
-            }
-            return tokens
-        }
-        
-        val origWords = tokenize(original)
-        val corrWords = tokenize(corrected)
-        
-        // Simple O(N*M) LCS to find matching words
-        val dp = Array(origWords.size + 1) { IntArray(corrWords.size + 1) }
-        for (i in 1..origWords.size) {
-            for (j in 1..corrWords.size) {
-                if (origWords[i-1] == corrWords[j-1]) {
-                    dp[i][j] = dp[i-1][j-1] + 1
-                } else {
-                    dp[i][j] = maxOf(dp[i-1][j], dp[i][j-1])
-                }
-            }
-        }
-        
-        // Backtrack to find matching indices in corrWords
-        val matches = BooleanArray(corrWords.size)
-        var i = origWords.size
-        var j = corrWords.size
-        while (i > 0 && j > 0) {
-            if (origWords[i-1] == corrWords[j-1]) {
-                matches[j-1] = true
-                i--
-                j--
-            } else if (dp[i-1][j] > dp[i][j-1]) {
-                i--
-            } else {
-                j--
-            }
-        }
-        
-        // Now apply spans
-        var currentIndex = 0
-        
-        val isNightMode = (binding.root.context.resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK) == android.content.res.Configuration.UI_MODE_NIGHT_YES
-        val color = if (isNightMode) "#81C784".toColorInt() else "#2E7D32".toColorInt()
-        val bgColor = if (isNightMode) "#1B5E20".toColorInt() else "#E8F5E9".toColorInt()
-        
-        for (k in corrWords.indices) {
-            val word = corrWords[k]
-            // Only highlight words that don't match AND are actual word characters (ignore whitespace/punctuation differences)
-            if (!matches[k] && word.matches(Regex(".*\\w.*"))) {
-                spannable.setSpan(
-                    android.text.style.ForegroundColorSpan(color),
-                    currentIndex,
-                    currentIndex + word.length,
-                    android.text.Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-                )
-                spannable.setSpan(
-                    android.text.style.StyleSpan(android.graphics.Typeface.BOLD),
-                    currentIndex,
-                    currentIndex + word.length,
-                    android.text.Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-                )
-                spannable.setSpan(
-                    android.text.style.BackgroundColorSpan(bgColor),
-                    currentIndex,
-                    currentIndex + word.length,
-                    android.text.Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-                )
-            }
-            currentIndex += word.length
-        }
-        
-        return spannable
-    }
 
     fun showError(message: String, onRetry: () -> Unit) {
         binding.layoutLoading.visibility = View.GONE

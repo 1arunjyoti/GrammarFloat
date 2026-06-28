@@ -41,7 +41,7 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Manual Grammar Check"
+                    android:text="@string/manual_grammar_check"
                     android:textSize="18sp"
                     android:textStyle="bold"
                     app:drawableStartCompat="@drawable/ic_edit"
@@ -53,7 +53,7 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Paste or type text to instantly check its grammar without needing to use the selection popup."
+                    android:text="@string/manual_check_desc"
                     android:textColor="?android:attr/textColorSecondary"
                     android:textSize="14sp"
                     android:layout_marginBottom="16dp" />
@@ -63,7 +63,7 @@
                     style="@style/Widget.Material3.Button.TonalButton"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Open Editor" />
+                    android:text="@string/open_editor" />
 
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
@@ -144,7 +144,7 @@
                     android:text="@string/seamless_mode_title"
                     android:textSize="18sp"
                     android:textStyle="bold"
-                    app:drawableStartCompat="@android:drawable/ic_menu_agenda"
+                    app:drawableStartCompat="@drawable/ic_accessibility"
                     android:drawablePadding="8dp"
                     android:gravity="center_vertical"
                     android:layout_marginBottom="8dp"
@@ -179,8 +179,8 @@
                     style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Manage Excluded Apps"
-                    app:icon="@android:drawable/ic_menu_sort_by_size" />
+                    android:text="@string/manage_excluded_apps"
+                    app:icon="@drawable/ic_list" />
 
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
@@ -273,7 +273,7 @@
                     android:text="@string/appearance"
                     android:textSize="18sp"
                     android:textStyle="bold"
-                    app:drawableStartCompat="@android:drawable/ic_menu_edit"
+                    app:drawableStartCompat="@drawable/ic_edit"
                     android:drawablePadding="8dp"
                     android:gravity="center_vertical"
                     android:layout_marginBottom="16dp"
@@ -282,7 +282,7 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Theme Mode"
+                    android:text="@string/theme_mode"
                     android:textSize="14sp"
                     android:textColor="?android:attr/textColorSecondary"
                     android:layout_marginBottom="8dp" />
@@ -301,7 +301,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="System" />
+                        android:text="@string/theme_system" />
                         
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnThemeLight"
@@ -309,7 +309,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Light" />
+                        android:text="@string/theme_light" />
                         
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnThemeDark"
@@ -317,14 +317,14 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Dark" />
+                        android:text="@string/theme_dark" />
                 </com.google.android.material.button.MaterialButtonToggleGroup>
 
                 <TextView
                     android:id="@+id/tvFontSizeLabel"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/appearance"
+                    tools:text="Overlay Font Size: 16"
                     android:textSize="14sp"
                     android:textColor="?android:attr/textColorSecondary"
                     android:layout_marginBottom="8dp" />
@@ -352,8 +352,8 @@
                     style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Test Overlay (Mock Data)"
-                    app:icon="@android:drawable/ic_menu_view" />
+                    android:text="@string/test_overlay_mock_data"
+                    app:icon="@drawable/ic_visibility" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 

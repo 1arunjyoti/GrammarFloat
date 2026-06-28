@@ -8,7 +8,6 @@
         <item name="colorOnPrimaryContainer">#EADDFF</item>
         <item name="colorSurfaceContainer">#1D1B20</item>
         <item name="colorSurfaceContainerLow">#141218</item>
-        <!-- Keep status bar icons light (white) on dark backgrounds -->
-        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:statusBarColor">?android:attr/colorBackground</item>
     </style>
 </resources>

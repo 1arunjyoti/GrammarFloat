@@ -37,102 +37,111 @@ object GeminiApiClient : ApiClient {
     )
 
     override suspend fun checkGrammar(text: String, apiKey: String): String = withContext(Dispatchers.IO) {
-        val payload = GeminiRequest(
-            systemInstruction = Content(listOf(Part("You are a professional grammar and spell checker. Respond ONLY with the corrected text. Do not add conversational padding, explanations, or quotes. If the text is already perfect, return it exactly as is."))),
-            contents = listOf(Content(listOf(Part(text))))
-        )
+        safeApiCall("Gemini") {
+            val payload = GeminiRequest(
+                systemInstruction = Content(listOf(Part(Prompts.GRAMMAR_CORRECTION))),
+                contents = listOf(Content(listOf(Part(text))))
+            )
 
-        val jsonBody = NetworkModule.json.encodeToString(payload)
-        val requestBody = jsonBody.toRequestBody("application/json".toMediaType())
+            val jsonBody = NetworkModule.json.encodeToString(payload)
+            val requestBody = jsonBody.toRequestBody("application/json".toMediaType())
 
-        val request = Request.Builder()
-            .url("https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent")
-            .addHeader("x-goog-api-key", apiKey.trim())
-            .post(requestBody)
-            .build()
+            val request = Request.Builder()
+                .url("https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent")
+                .addHeader("x-goog-api-key", apiKey.trim())
+                .post(requestBody)
+                .build()
 
-        NetworkModule.okHttpClient.newCall(request).await().use { response ->
-            if (!response.isSuccessful) {
-                throw Exception("Gemini API error: ${response.code} ${response.message}")
+            NetworkModule.okHttpClient.newCall(request).await().use { response ->
+                response.checkStatus("Gemini")
+                
+                val responseBodyString = response.body.string()
+                val geminiResponse = try {
+                    NetworkModule.json.decodeFromString<GeminiResponse>(responseBodyString)
+                } catch (e: Exception) {
+                    throw ApiException.ParseError()
+                }
+                
+                geminiResponse.candidates?.firstOrNull()?.content?.parts?.firstOrNull()?.text?.trim() ?: throw ApiException.ParseError()
             }
-            
-            val responseBodyString = response.body.string()
-            val geminiResponse = NetworkModule.json.decodeFromString<GeminiResponse>(responseBodyString)
-            
-            geminiResponse.candidates?.firstOrNull()?.content?.parts?.firstOrNull()?.text?.trim() ?: throw Exception("No content in response")
         }
     }
 
     override suspend fun explainCorrection(original: String, corrected: String, apiKey: String): String = withContext(Dispatchers.IO) {
-        val prompt = "Briefly explain in 1-2 sentences why the following text was corrected.\n\nOriginal: $original\nCorrected: $corrected"
+        safeApiCall("Gemini") {
+            val prompt = "Original: $original\nCorrected: $corrected"
 
-        val payload = GeminiRequest(
-            contents = listOf(
-                Content(
-                    parts = listOf(Part(text = prompt))
+            val payload = GeminiRequest(
+                systemInstruction = Content(
+                    parts = listOf(Part(text = Prompts.EXPLAIN_CORRECTION))
+                ),
+                contents = listOf(
+                    Content(
+                        parts = listOf(Part(text = prompt))
+                    )
                 )
-            ),
-            systemInstruction = Content(
-                parts = listOf(Part(text = "You are a helpful grammar assistant. Provide short, concise explanations."))
             )
-        )
 
-        val jsonBody = NetworkModule.json.encodeToString(payload)
-        val requestBody = jsonBody.toRequestBody("application/json".toMediaType())
+            val jsonBody = NetworkModule.json.encodeToString(payload)
+            val requestBody = jsonBody.toRequestBody("application/json".toMediaType())
 
-        val request = Request.Builder()
-            .url("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey.trim()}")
-            .post(requestBody)
-            .build()
+            val request = Request.Builder()
+                .url("https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent")
+                .addHeader("x-goog-api-key", apiKey.trim())
+                .post(requestBody)
+                .build()
 
-        NetworkModule.okHttpClient.newCall(request).await().use { response ->
-            if (!response.isSuccessful) {
-                throw Exception("Gemini API error: ${response.code} ${response.message}")
+            NetworkModule.okHttpClient.newCall(request).await().use { response ->
+                response.checkStatus("Gemini")
+                
+                val responseBodyString = response.body.string()
+                val geminiResponse = try {
+                    NetworkModule.json.decodeFromString<GeminiResponse>(responseBodyString)
+                } catch (e: Exception) {
+                    throw ApiException.ParseError()
+                }
+                
+                geminiResponse.candidates?.firstOrNull()?.content?.parts?.firstOrNull()?.text?.trim() ?: throw ApiException.ParseError()
             }
-            
-            val responseBodyString = response.body.string()
-            val geminiResponse = NetworkModule.json.decodeFromString<GeminiResponse>(responseBodyString)
-            
-            geminiResponse.candidates?.firstOrNull()?.content?.parts?.firstOrNull()?.text?.trim() ?: throw Exception("Could not find explanation in response")
         }
     }
 
     override suspend fun adjustTone(text: String, tone: String, apiKey: String): String = withContext(Dispatchers.IO) {
-        val instruction = when (tone.lowercase()) {
-            "professional" -> "Rewrite the following text to sound highly professional, formal, and polished. Respond ONLY with the rewritten text."
-            "casual" -> "Rewrite the following text to sound casual, friendly, and conversational. Respond ONLY with the rewritten text."
-            "shorten" -> "Rewrite the following text to be as concise and short as possible without losing the main meaning. Respond ONLY with the rewritten text."
-            else -> "Rewrite the following text. Respond ONLY with the rewritten text."
-        }
+        safeApiCall("Gemini") {
+            val instruction = Prompts.getToneInstruction(tone)
 
-        val payload = GeminiRequest(
-            contents = listOf(
-                Content(
-                    parts = listOf(Part(text = text))
+            val payload = GeminiRequest(
+                systemInstruction = Content(
+                    parts = listOf(Part(text = instruction))
+                ),
+                contents = listOf(
+                    Content(
+                        parts = listOf(Part(text = text))
+                    )
                 )
-            ),
-            systemInstruction = Content(
-                parts = listOf(Part(text = instruction))
             )
-        )
 
-        val jsonBody = NetworkModule.json.encodeToString(payload)
-        val requestBody = jsonBody.toRequestBody("application/json".toMediaType())
+            val jsonBody = NetworkModule.json.encodeToString(payload)
+            val requestBody = jsonBody.toRequestBody("application/json".toMediaType())
 
-        val request = Request.Builder()
-            .url("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey.trim()}")
-            .post(requestBody)
-            .build()
+            val request = Request.Builder()
+                .url("https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent")
+                .addHeader("x-goog-api-key", apiKey.trim())
+                .post(requestBody)
+                .build()
 
-        NetworkModule.okHttpClient.newCall(request).await().use { response ->
-            if (!response.isSuccessful) {
-                throw Exception("Gemini API error: ${response.code} ${response.message}")
+            NetworkModule.okHttpClient.newCall(request).await().use { response ->
+                response.checkStatus("Gemini")
+                
+                val responseBodyString = response.body.string()
+                val geminiResponse = try {
+                    NetworkModule.json.decodeFromString<GeminiResponse>(responseBodyString)
+                } catch (e: Exception) {
+                    throw ApiException.ParseError()
+                }
+                
+                geminiResponse.candidates?.firstOrNull()?.content?.parts?.firstOrNull()?.text?.trim() ?: throw ApiException.ParseError()
             }
-            
-            val responseBodyString = response.body.string()
-            val geminiResponse = NetworkModule.json.decodeFromString<GeminiResponse>(responseBodyString)
-            
-            geminiResponse.candidates?.firstOrNull()?.content?.parts?.firstOrNull()?.text?.trim() ?: throw Exception("Could not find text in response")
         }
     }
 }

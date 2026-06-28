@@ -8,8 +8,8 @@
         <item name="colorOnPrimaryContainer">#21005D</item>
         <item name="colorSurfaceContainer">#F3EDFA</item>
         <item name="colorSurfaceContainerLow">#FAF8FC</item>
-        <!-- Ensure status bar icons are dark (visible) on light backgrounds -->
-        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:statusBarColor">?android:attr/colorBackground</item>
+        <item name="android:windowLightStatusBar">?attr/isLightTheme</item>
     </style>
 
     <style name="OverlayAnimation">

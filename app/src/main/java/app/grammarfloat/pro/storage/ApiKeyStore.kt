@@ -20,7 +20,7 @@ class ApiKeyStore(context: Context) {
     companion object {
         private const val ALIAS = "GrammarFloatApiKeyAlias"
 
-        init {
+        private val keyStoreInit: Unit by lazy {
             try {
                 val keyStore = KeyStore.getInstance("AndroidKeyStore")
                 keyStore.load(null)
@@ -37,11 +37,13 @@ class ApiKeyStore(context: Context) {
                     keyGenerator.generateKey()
                 }
             } catch (e: Exception) {
-                e.printStackTrace()
+                android.util.Log.e("ApiKeyStore", "Failed to initialize KeyStore", e)
             }
+            Unit
         }
 
         private fun encrypt(plainText: String): String? {
+            keyStoreInit
             return try {
                 val cipher = Cipher.getInstance("AES/GCM/NoPadding")
                 val keyStore = KeyStore.getInstance("AndroidKeyStore")
@@ -56,12 +58,13 @@ class ApiKeyStore(context: Context) {
                 System.arraycopy(encrypted, 0, combined, iv.size, encrypted.size)
                 Base64.encodeToString(combined, Base64.NO_WRAP)
             } catch (e: Exception) {
-                e.printStackTrace()
+                android.util.Log.e("ApiKeyStore", "Failed to encrypt text", e)
                 null
             }
         }
 
         private fun decrypt(encryptedText: String): String? {
+            keyStoreInit
             return try {
                 val combined = Base64.decode(encryptedText, Base64.NO_WRAP)
                 val cipher = Cipher.getInstance("AES/GCM/NoPadding")
@@ -76,7 +79,7 @@ class ApiKeyStore(context: Context) {
                 cipher.init(Cipher.DECRYPT_MODE, secretKey, spec)
                 String(cipher.doFinal(encrypted), Charsets.UTF_8)
             } catch (e: Exception) {
-                e.printStackTrace()
+                android.util.Log.e("ApiKeyStore", "Failed to decrypt text", e)
                 null
             }
         }
@@ -87,11 +90,10 @@ class ApiKeyStore(context: Context) {
         return decrypt(encrypted)
     }
 
-    fun setApiKey(provider: Provider, key: String) {
-        val encrypted = encrypt(key)
-        if (encrypted != null) {
-            prefs.edit { putString("api_key_${provider.name}", encrypted) }
-        }
+    fun setApiKey(provider: Provider, key: String): Boolean {
+        val encrypted = encrypt(key) ?: return false
+        prefs.edit { putString("api_key_${provider.name}", encrypted) }
+        return true
     }
 
 
