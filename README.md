@@ -1,8 +1,8 @@
 # GrammarFloat - AI-Powered Grammar Correction and Text Enhancement for Android
 
-|                        App Screen 1                         |                         App Screen 2                         |                         Overlay                          |
-|:-----------------------------------------------------------:|:------------------------------------------------------------:|:--------------------------------------------------------:|
-| <img src="assets/screenshots/app_screen.png" height="400"/> | <img src="assets/screenshots/app_screen2.png" height="400"/> | <img src="assets/screenshots/overlay.png" height="400"/> |
+|                        App Screen 1                         |                         App Screen 2                         |                       Options Screen                         |                         Overlay                          |
+|:-----------------------------------------------------------:|:------------------------------------------------------------:|:------------------------------------------------------------:|:--------------------------------------------------------:|
+| <img src="assets/screenshots/app_screen.png" height="400"/> | <img src="assets/screenshots/app_screen2.png" height="400"/> | <img src="assets/screenshots/options_screen.png" height="400"/> | <img src="assets/screenshots/overlay.png" height="400"/> |
 
 ## Project Description
 
@@ -63,6 +63,31 @@ The application is built around a transient, service-based architecture located 
    - The `ApiClient` interface supports `checkGrammar`, `explainCorrection`, and `adjustTone`.
    - Handled dynamically by `ApiClientFactory` returning the user's selected provider implementation (`AnthropicApiClient`, `OpenAiApiClient`, or `GeminiApiClient`).
 
+## Installation Guide
+
+Since GrammarFloat is not currently available on the Google Play Store, you must compile and side-load the APK onto your Android device.
+
+1. **Build the APK**:
+   Run the following command to generate a debug APK:
+   ```bash
+   ./gradlew assembleDebug
+   ```
+   The generated APK will be located at `app/build/outputs/apk/debug/app-debug.apk`.
+
+2. **Install the APK**:
+   Transfer the APK to your Android device and open it to install. 
+   *(Note: You may need to enable "Install unknown apps" for your file manager or browser).*
+
+3. **Google Play Protect Warning**:
+   During installation, Google Play Protect will likely flag the app as "Unsafe" or "Unknown developer". This happens because the app requests permissions (like Accessibility Service and System Alert Window) and is self-signed/sideloaded.
+   - To bypass this, tap **"More details"** on the warning prompt.
+   - Tap **"Install anyway"** to proceed with the installation.
+   - Alternatively, temporarily disable Play Protect in the Google Play Store settings.
+   - You can also install the app directly via ADB (`adb install <path-to-apk>`).
+
+> [!WARNING]
+> **Disclaimer:** While this application is open-source and completely safe (all AI communication happens directly from your device), it requests system permissions to function. Please review the source code if you have any concerns. Sideloading apps is done entirely at your own risk.
+
 ## How to Use the App
 
 1. **Initial Setup:** Open the GrammarFloat app from your launcher. Grant the required "Draw over other apps" permission and enter your preferred AI provider's API key. You can also enable the "Accessibility Service" in your device settings to activate the seamless floating button.
@@ -76,6 +101,7 @@ The application is built around a transient, service-based architecture located 
    - Use the extra tools in the panel to ask for an **Explanation** or to **Adjust Tone**.
    - Tap outside the panel or the close button to dismiss it.
 4. **App Exclusions:** If the floating button gets in the way in certain apps, use the **Excluded Apps** menu in the main application to disable the button for those specific applications.
+5. Model ID: The app allows you to select different AI models from your chosen provider. You can change the model by entering the model id provided by the selected provider in the settings.
 
 ## How to Maintain the Project
 

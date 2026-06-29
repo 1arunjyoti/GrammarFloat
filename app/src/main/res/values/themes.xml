@@ -17,7 +17,17 @@
         <item name="android:windowExitAnimation">@anim/fade_scale_out</item>
     </style>
 
-    <!-- Theme to keep ProcessTextActivity fully invisible while not stealing input focus -->
+    <!--
+        Theme.ProcessText: fully transparent, zero-chrome trampoline activity.
+
+        windowDisablePreview is intentionally NOT set here. Some host apps (Gmail,
+        Messages) check that the launched activity produced a window snapshot before
+        clearing their text-selection context. Disabling the preview suppresses that
+        signal and makes the launch appear to fail.
+
+        The transparent appearance is achieved via windowIsTranslucent +
+        windowBackground=transparent alone, without the problematic window flags.
+    -->
     <style name="Theme.ProcessText" parent="Theme.AppCompat.DayNight.NoActionBar">
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowBackground">@android:color/transparent</item>
@@ -26,7 +36,6 @@
         <item name="android:windowIsFloating">false</item>
         <item name="android:backgroundDimEnabled">false</item>
         <item name="android:windowAnimationStyle">@null</item>
-        <item name="android:windowDisablePreview">true</item>
     </style>
 
 

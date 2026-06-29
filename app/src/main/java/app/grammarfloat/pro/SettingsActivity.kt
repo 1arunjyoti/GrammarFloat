@@ -1,7 +1,9 @@
 package app.grammarfloat.pro
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.os.PowerManager
 import android.provider.Settings
 import android.text.TextUtils
 import android.view.View
@@ -11,6 +13,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.graphics.toColorInt
 import androidx.core.net.toUri
 import app.grammarfloat.pro.api.ApiClientFactory
+import app.grammarfloat.pro.api.ModelDefaults
 import app.grammarfloat.pro.api.Provider
 import app.grammarfloat.pro.databinding.ActivitySettingsBinding
 import app.grammarfloat.pro.storage.ApiKeyStore
@@ -37,11 +40,34 @@ class SettingsActivity : AppCompatActivity() {
         settingsStore = app.grammarfloat.pro.storage.SettingsStore(this)
 
         setupProviderSpinner()
+        setupModelIdField()
         setupPermissionButton()
         setupSeamlessModeButton()
+        setupBatteryOptimizationButton()
         setupLinks()
         setupSaveButton()
         setupAppearance()
+
+        binding.btnHowToUse.setOnClickListener {
+            app.grammarfloat.pro.ui.TutorialBottomSheetFragment().show(supportFragmentManager, "tutorial")
+        }
+
+        binding.tvManualCheckTitle.setOnClickListener {
+            android.transition.TransitionManager.beginDelayedTransition(binding.root as android.view.ViewGroup)
+            val content = binding.llManualCheckContent
+            val isExpanded = content.visibility == android.view.View.VISIBLE
+            if (isExpanded) {
+                content.visibility = android.view.View.GONE
+                binding.tvManualCheckTitle.setCompoundDrawablesRelativeWithIntrinsicBounds(
+                    R.drawable.ic_edit, 0, R.drawable.ic_expand_more, 0
+                )
+            } else {
+                content.visibility = android.view.View.VISIBLE
+                binding.tvManualCheckTitle.setCompoundDrawablesRelativeWithIntrinsicBounds(
+                    R.drawable.ic_edit, 0, R.drawable.ic_expand_less, 0
+                )
+            }
+        }
 
         binding.btnManualCheck.setOnClickListener {
             startActivity(Intent(this, ManualCheckActivity::class.java))
@@ -117,6 +143,7 @@ class SettingsActivity : AppCompatActivity() {
         super.onResume()
         updatePermissionStatus()
         updateSeamlessModeStatus()
+        updateBatteryOptimizationStatus()
     }
 
     override fun onDestroy() {
@@ -135,7 +162,24 @@ class SettingsActivity : AppCompatActivity() {
         binding.spinnerProvider.setOnItemClickListener { _, _, position, _ ->
             val selectedProvider = providers[position]
             binding.etApiKey.setText(store.getApiKey(selectedProvider) ?: "")
+            binding.etModelId.setText(store.getModelId(selectedProvider) ?: "")
+            updateModelHelperText(selectedProvider)
         }
+    }
+
+    private fun setupModelIdField() {
+        // Show clear icon always when text is present, regardless of focus
+        binding.tilModelId.setEndIconOnClickListener {
+            binding.etModelId.setText("")
+        }
+        
+        binding.etModelId.addTextChangedListener(object : android.text.TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            override fun afterTextChanged(s: android.text.Editable?) {
+                binding.tilModelId.isEndIconVisible = !s.isNullOrEmpty()
+            }
+        })
     }
 
     private fun setupPermissionButton() {
@@ -157,6 +201,23 @@ class SettingsActivity : AppCompatActivity() {
         binding.btnManageExcludedApps.setOnClickListener {
             val intent = Intent(this, ExcludedAppsActivity::class.java)
             startActivity(intent)
+        }
+    }
+
+    private fun setupBatteryOptimizationButton() {
+        binding.btnDisableBatteryOptimization.setOnClickListener {
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+                val pm = getSystemService(Context.POWER_SERVICE) as PowerManager
+                if (!pm.isIgnoringBatteryOptimizations(packageName)) {
+                    val intent = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS).apply {
+                        data = "package:$packageName".toUri()
+                    }
+                    startActivity(intent)
+                } else {
+                    val intent = Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS)
+                    startActivity(intent)
+                }
+            }
         }
     }
 
@@ -203,6 +264,24 @@ class SettingsActivity : AppCompatActivity() {
                 val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
                 startActivity(intent)
             }
+        }
+    }
+
+    private fun updateBatteryOptimizationStatus() {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+            val pm = getSystemService(Context.POWER_SERVICE) as PowerManager
+            if (pm.isIgnoringBatteryOptimizations(packageName)) {
+                binding.tvBatteryStatus.text = getString(R.string.unrestricted_recommended)
+                binding.tvBatteryStatus.setTextColor("#4CAF50".toColorInt())
+                binding.btnDisableBatteryOptimization.visibility = View.GONE
+            } else {
+                binding.tvBatteryStatus.text = getString(R.string.optimized_service_may_be_killed)
+                binding.tvBatteryStatus.setTextColor("#F44336".toColorInt())
+                binding.btnDisableBatteryOptimization.visibility = View.VISIBLE
+            }
+        } else {
+            binding.tvBatteryStatus.text = getString(R.string.not_required_on_this_android_version)
+            binding.btnDisableBatteryOptimization.visibility = View.GONE
         }
     }
 
@@ -256,16 +335,30 @@ class SettingsActivity : AppCompatActivity() {
             if (key.isNotBlank()) {
                 binding.btnSaveKey.isEnabled = false
                 binding.btnSaveKey.text = getString(R.string.validating)
-                
+
+                // Resolve model ID before launching the coroutine
+                val modelId = binding.etModelId.text.toString().trim().let { typed ->
+                    typed.ifBlank { ModelDefaults.forProvider(provider) }
+                }
+
                 activityScope.launch {
                     try {
                         val apiClient = ApiClientFactory.get(provider)
-                        // Send a tiny deliberately-wrong payload to test auth headers
-                        apiClient.checkGrammar("I is a engineer.", key)
-                        
+                        // Send a tiny deliberately-wrong payload to test auth headers + model ID
+                        apiClient.checkGrammar("I is a engineer.", key, modelId)
+
                         if (store.setApiKey(provider, key)) {
                             store.setActiveProvider(provider)
-                            Toast.makeText(this@SettingsActivity, R.string.key_verified_saved, Toast.LENGTH_SHORT).show()
+
+                            // Persist or clear custom model ID
+                            val typedModel = binding.etModelId.text.toString().trim()
+                            if (typedModel.isNotBlank()) {
+                                store.setModelId(provider, typedModel)
+                            } else {
+                                store.clearModelId(provider)
+                            }
+
+                            Toast.makeText(this@SettingsActivity, "${getString(R.string.key_verified_saved)} ($modelId)", Toast.LENGTH_SHORT).show()
                         } else {
                             Toast.makeText(this@SettingsActivity, "Failed to save API key", Toast.LENGTH_LONG).show()
                         }
@@ -288,8 +381,16 @@ class SettingsActivity : AppCompatActivity() {
         val activeProvider = store.getActiveProvider()
         val index = providers.indexOf(activeProvider)
         val provider = if (index >= 0) providers[index] else providers[0]
-        
+
         binding.spinnerProvider.setText(provider.displayName, false)
         binding.etApiKey.setText(store.getApiKey(provider) ?: "")
+        binding.etModelId.setText(store.getModelId(provider) ?: "")
+        updateModelHelperText(provider)
+        binding.tilModelId.isEndIconVisible = !binding.etModelId.text.isNullOrEmpty()
+    }
+
+    private fun updateModelHelperText(provider: Provider) {
+        val default = ModelDefaults.forProvider(provider)
+        binding.tilModelId.helperText = getString(R.string.model_id_helper, default)
     }
 }

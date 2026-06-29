@@ -1,13 +1,18 @@
 <resources>
     <string name="app_name">Grammar Float</string>
     <string name="settings_title">Settings</string>
-    <string name="system_permission">System Permission</string>
+    <string name="system_permission">Normal Mode</string>
     <string name="permission_desc">The app requires \'Display over other apps\' permission to show the grammar correction overlay anywhere.</string>
     <string name="checking_permission">Checking permission…</string>
     <string name="grant_permission">Grant Overlay Permission</string>
     <string name="ai_configuration">AI Configuration</string>
     <string name="select_provider">Select Provider</string>
     <string name="api_key">API Key</string>
+    <string name="model_id_hint">Model ID (optional)</string>
+    <string name="model_id_helper">Tap Verify to apply. Clear to use default (%1$s)</string>
+    <string name="model_default_anthropic">claude-haiku-4-5-20251001</string>
+    <string name="model_default_openai">gpt-5.4-nano</string>
+    <string name="model_default_gemini">gemini-3.1-flash-lite</string>
     <string name="verify_save">Verify and Save Key</string>
     <string name="api_key_resources">API Key Resources</string>
     <string name="get_anthropic">Get Anthropic Key</string>
@@ -44,13 +49,17 @@
     <!-- Accessibility / Seamless Mode -->
     <string name="accessibility_service_description">GrammarFloat seamless mode. Displays a floating button when typing to quickly check grammar.</string>
     <string name="seamless_mode_title">Seamless Mode (Accessibility)</string>
-    <string name="seamless_mode_desc">Adds a floating trigger near text fields for a seamless grammar check without selecting text manually. Requires Accessibility permission.</string>
+    <string name="seamless_mode_desc">Adds a floating trigger on the screen for a seamless grammar check without selecting text manually. Requires Accessibility permission.</string>
+    <string name="seamless_mode_info">Note: The normal text selection mode/Check grammar option might not work in every app. To ensure it works everywhere, please enable the Seamless Mode feature.</string>
     <string name="enable_seamless_mode">Enable in Settings</string>
     <string name="disable_seamless_mode">Disable in Settings</string>
     <string name="seamless_mode_status_enabled">Status: Enabled</string>
     <string name="seamless_mode_status_disabled">Status: Action Required</string>
     
     <!-- New strings from Layouts -->
+    <string name="unrestricted_recommended">Unrestricted (Recommended)</string>
+    <string name="optimized_service_may_be_killed">Optimized (Service may be killed)</string>
+    <string name="not_required_on_this_android_version">Not required on this Android version</string>
     <string name="manual_grammar_check">Manual Grammar Check</string>
     <string name="open_editor">Open Editor</string>
     <string name="manual_check_desc">Paste or type text to instantly check its grammar without needing to use the selection popup.</string>
@@ -71,4 +80,21 @@
     <string name="correction">Correction</string>
     
     <string name="excluded_apps_title">Excluded Apps</string>
+
+    <!-- OverlayService foreground notification -->
+    <string name="overlay_notification_title">Grammar Checker</string>
+    <string name="overlay_notification_text">Processing your text…</string>
+    <string name="overlay_notification_channel_name">Grammar Overlay Service</string>
+    <!-- Tutorial -->
+    <string name="how_to_use">How to use</string>
+    <string name="tutorial_title">How to use Grammar Float</string>
+    <string name="tutorial_step1_title">1. Normal Mode (Context Menu)</string>
+    <string name="tutorial_step1_desc">Select any text you are typing and look for the \'Check Grammar\' option in the copy/paste menu. This works in many apps but may be restricted by some.</string>
+    <string name="tutorial_step2_title">2. Seamless Mode (Accessibility)</string>
+    <string name="tutorial_step2_desc">Once enabled, a small floating button will automatically appear on the screen whenever you are typing. Tap it to instantly fix your grammar without having to manually select the text!</string>
+    <string name="tutorial_step3_title">3. API Key Required</string>
+    <string name="tutorial_step3_desc">To power the AI, you must add an API key from Anthropic, OpenAI, or Google Gemini in the settings below.</string>
+    <string name="tutorial_step4_title">4. Custom Models (Optional)</string>
+    <string name="tutorial_step4_desc">You can enter a model ID provided by the selected provider in the settings. To reset to the default model, simply clear the model text field and tap Verify again.</string>
+    <string name="got_it">Got it</string>
 </resources>

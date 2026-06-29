@@ -21,12 +21,12 @@ object OpenAiApiClient : ApiClient {
         val input: String
     )
 
-    override suspend fun checkGrammar(text: String, apiKey: String): String = withContext(Dispatchers.IO) {
+    override suspend fun checkGrammar(text: String, apiKey: String, modelId: String): String = withContext(Dispatchers.IO) {
         safeApiCall("OpenAI") {
             val instructions = Prompts.GRAMMAR_CORRECTION
             
             val payload = OpenAiRequest(
-                model = "gpt-5.4-nano",
+                model = modelId,
                 instructions = instructions,
                 input = text
             )
@@ -64,13 +64,13 @@ object OpenAiApiClient : ApiClient {
         }
     }
 
-    override suspend fun explainCorrection(original: String, corrected: String, apiKey: String): String = withContext(Dispatchers.IO) {
+    override suspend fun explainCorrection(original: String, corrected: String, apiKey: String, modelId: String): String = withContext(Dispatchers.IO) {
         safeApiCall("OpenAI") {
             val instructions = Prompts.EXPLAIN_CORRECTION
             val input = "Original: $original\nCorrected: $corrected"
             
             val payload = OpenAiRequest(
-                model = "gpt-5.4-nano",
+                model = modelId,
                 instructions = instructions,
                 input = input
             )
@@ -106,12 +106,12 @@ object OpenAiApiClient : ApiClient {
         }
     }
 
-    override suspend fun adjustTone(text: String, tone: String, apiKey: String): String = withContext(Dispatchers.IO) {
+    override suspend fun adjustTone(text: String, tone: String, apiKey: String, modelId: String): String = withContext(Dispatchers.IO) {
         safeApiCall("OpenAI") {
             val instruction = Prompts.getToneInstruction(tone)
             
             val payload = OpenAiRequest(
-                model = "gpt-5.4-nano",
+                model = modelId,
                 instructions = instruction,
                 input = text
             )

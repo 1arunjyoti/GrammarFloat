@@ -10,13 +10,15 @@ import androidx.core.graphics.toColorInt
 import java.util.regex.Pattern
 
 object TextDiffHighlighter {
+    // Pre-compiled: avoids allocating a new Regex on every token during diff highlighting.
+    private val WORD_REGEX = Regex(".*\\w.*")
+    private val TOKEN_PATTERN = Pattern.compile("\\w+|\\W+")
     fun getHighlightedText(original: String, corrected: String, isNightMode: Boolean): SpannableString {
         val spannable = SpannableString(corrected)
         
-        val pattern = Pattern.compile("\\w+|\\W+")
         fun tokenize(text: String): List<String> {
             val tokens = mutableListOf<String>()
-            val matcher = pattern.matcher(text)
+            val matcher = TOKEN_PATTERN.matcher(text)
             while (matcher.find()) {
                 tokens.add(matcher.group())
             }
@@ -63,7 +65,7 @@ object TextDiffHighlighter {
         for (k in corrWords.indices) {
             val word = corrWords[k]
             // Only highlight words that don't match AND are actual word characters (ignore whitespace/punctuation differences)
-            if (!matches[k] && word.matches(Regex(".*\\w.*"))) {
+            if (!matches[k] && word.matches(WORD_REGEX)) {
                 spannable.setSpan(
                     ForegroundColorSpan(color),
                     currentIndex,

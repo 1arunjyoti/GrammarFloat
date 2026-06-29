@@ -109,4 +109,20 @@ class ApiKeyStore(context: Context) {
     fun setActiveProvider(provider: Provider) {
         prefs.edit { putString("active_provider", provider.name) }
     }
+
+    // Model ID storage — plain strings, not sensitive
+    fun getModelId(provider: Provider): String? {
+        return prefs.getString("model_id_${provider.name}", null)?.trim()?.ifBlank { null }
+    }
+
+    fun setModelId(provider: Provider, modelId: String) {
+        val trimmed = modelId.trim()
+        if (trimmed.isNotBlank()) {
+            prefs.edit { putString("model_id_${provider.name}", trimmed) }
+        }
+    }
+
+    fun clearModelId(provider: Provider) {
+        prefs.edit { remove("model_id_${provider.name}") }
+    }
 }

@@ -13,6 +13,10 @@
 
     <!-- Required: AI API call -->
     <uses-permission android:name="android.permission.INTERNET" />
+    
+    <!-- Required: Prevent Android from killing the accessibility service -->
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+    
     <!-- Required: Query installed apps for exclusion list -->
     <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" tools:ignore="QueryAllPackagesPermission" />
 

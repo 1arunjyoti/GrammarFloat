@@ -34,10 +34,10 @@ object AnthropicApiClient : ApiClient {
         val text: String
     )
 
-    override suspend fun checkGrammar(text: String, apiKey: String): String = withContext(Dispatchers.IO) {
+    override suspend fun checkGrammar(text: String, apiKey: String, modelId: String): String = withContext(Dispatchers.IO) {
         safeApiCall("Anthropic") {
             val payload = AnthropicRequest(
-                model = "claude-haiku-4-5-20251001",
+                model = modelId,
                 max_tokens = 2048,
                 system = Prompts.GRAMMAR_CORRECTION,
                 messages = listOf(Message("user", text))
@@ -68,12 +68,12 @@ object AnthropicApiClient : ApiClient {
         }
     }
 
-    override suspend fun explainCorrection(original: String, corrected: String, apiKey: String): String = withContext(Dispatchers.IO) {
+    override suspend fun explainCorrection(original: String, corrected: String, apiKey: String, modelId: String): String = withContext(Dispatchers.IO) {
         safeApiCall("Anthropic") {
             val prompt = "Original: $original\nCorrected: $corrected"
 
             val payload = AnthropicRequest(
-                model = "claude-haiku-4-5-20251001",
+                model = modelId,
                 max_tokens = 300,
                 system = Prompts.EXPLAIN_CORRECTION,
                 messages = listOf(
@@ -106,12 +106,12 @@ object AnthropicApiClient : ApiClient {
         }
     }
 
-    override suspend fun adjustTone(text: String, tone: String, apiKey: String): String = withContext(Dispatchers.IO) {
+    override suspend fun adjustTone(text: String, tone: String, apiKey: String, modelId: String): String = withContext(Dispatchers.IO) {
         safeApiCall("Anthropic") {
             val instruction = Prompts.getToneInstruction(tone)
 
             val payload = AnthropicRequest(
-                model = "claude-haiku-4-5-20251001",
+                model = modelId,
                 max_tokens = 2048,
                 system = instruction,
                 messages = listOf(

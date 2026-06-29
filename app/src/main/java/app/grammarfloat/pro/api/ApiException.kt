@@ -39,7 +39,9 @@ fun Response.checkStatus(provider: String) {
         throw when (code) {
             401 -> ApiException.InvalidKey(provider)
             429 -> ApiException.RateLimited()
-            500, 503 -> ApiException.GeneralError("The AI service is temporarily unavailable.")
+            500, 503 -> ApiException.GeneralError(
+                "AI service error (${code})${if (errorBody.isNotEmpty()) ": $errorBody" else ": service temporarily unavailable"}"
+            )
             else -> ApiException.GeneralError("API error $code${if (errorBody.isNotEmpty()) ": $errorBody" else ""}")
         }
     }
